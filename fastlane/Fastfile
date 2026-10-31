@@ -1,0 +1,21 @@
+default_platform(:ios)
+
+platform :ios do
+  desc "Upload the store listing in every language under fastlane/metadata (no binary, no screenshots)"
+  lane :listing do
+    app_store_connect_api_key(
+      key_id: ENV["KEY_ID"],
+      issuer_id: ENV["ISSUER"],
+      key_content: ENV["KEY_P8"],
+      in_house: false
+    )
+    deliver(
+      app_identifier: "com.luckybarslot",
+      skip_binary_upload: true,
+      skip_screenshots: true,
+      force: true,
+      submit_for_review: false,
+      precheck_include_in_app_purchases: false
+    )
+  end
+end

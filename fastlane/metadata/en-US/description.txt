@@ -1,0 +1,9 @@
+Lucky Bar Slot is a classic fruit machine game.
+
+- Bet on eight fruit and symbol cells, then press START.
+- Watch the lights run around the board and see where they stop.
+- Trigger bonus cells and win combinations.
+- Double your winnings with the BIG or SMALL gamble.
+- Look up the full rules in the in-game help.
+
+This is a game for fun. Points have no cash value and no real money is used to play.

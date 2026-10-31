@@ -17,6 +17,10 @@ on:
         description: Sign and upload to TestFlight
         type: boolean
         default: true
+      listing:
+        description: Upload the store listing in every language (fastlane/metadata)
+        type: boolean
+        default: false
 
 concurrency:
   group: ios-${{ github.ref }}
@@ -106,3 +110,19 @@ jobs:
           name: ios-build-log
           path: ios/App/*.log
           if-no-files-found: ignore
+
+  listing:
+    if: ${{ inputs.listing }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+      - name: Upload the store listing
+        env:
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: bundle exec fastlane listing
