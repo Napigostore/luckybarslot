@@ -1,0 +1,103 @@
+name: iOS
+
+# Builds Lucky Bar Slot on a GitHub-hosted Mac, then signs and uploads it to TestFlight.
+#  - Run by hand with "testflight" ticked, or push a commit whose message contains [testflight].
+#
+# Secrets (repository Settings → Secrets and variables → Actions):
+#   APPLE_TEAM_ID     10-character Team ID of the Apple Developer account
+#   ASC_KEY_ID        App Store Connect API key id
+#   ASC_ISSUER_ID     App Store Connect API issuer id
+#   ASC_KEY_P8        contents of the AuthKey_XXXX.p8 file
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      testflight:
+        description: Sign and upload to TestFlight
+        type: boolean
+        default: true
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  testflight:
+    if: ${{ inputs.testflight || contains(github.event.head_commit.message, '[testflight]') }}
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      # App Store Connect only accepts builds made with the iOS 26 SDK (Xcode 26) or later.
+      - name: Use Xcode 26
+        run: |
+          X=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          if [ -z "$X" ]; then echo "::error title=Xcode::No Xcode 26 on this runner: $(ls /Applications | grep Xcode | xargs)"; exit 1; fi
+          sudo xcode-select -s "$X"
+          xcodebuild -version
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install packages and sync the web game into iOS
+        run: |
+          npm ci
+          npx cap sync ios
+
+      - name: Archive, sign and upload
+        env:
+          TEAM: ${{ secrets.APPLE_TEAM_ID }}
+          KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          # Problems are published as one annotation on the run, so they can be read without opening the log.
+          report() {
+            grep -iE "error|failed|invalid|denied|no profiles|no account|missing" "$1" | grep -viE "^\s*$|warning:" | awk '!seen[$0]++' | head -40 > problems.txt || true
+            [ -s problems.txt ] || tail -15 "$1" > problems.txt
+            echo "::error title=TestFlight::$1: $(awk '{gsub(/%/,"%25"); printf "%s%%0A", $0}' problems.txt)"
+            exit 1
+          }
+          missing=""
+          for name in TEAM KEY_ID ISSUER KEY_P8; do [ -z "${!name}" ] && missing="$missing $name"; done
+          if [ -n "$missing" ]; then echo "::error title=TestFlight::Missing secrets:$missing (APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_KEY_P8)"; exit 1; fi
+
+          KEY_PATH="$RUNNER_TEMP/AuthKey_$KEY_ID.p8"
+          printf '%s\n' "$KEY_P8" > "$KEY_PATH"
+          AUTH=(-allowProvisioningUpdates -authenticationKeyPath "$KEY_PATH" -authenticationKeyID "$KEY_ID" -authenticationKeyIssuerID "$ISSUER")
+
+          # Build number must rise on every upload; the run number provides one.
+          # The archive is built unsigned, and the export below signs it for App Store distribution.
+          cd ios/App
+          xcodebuild -project App.xcodeproj -scheme App -configuration Release \
+            -destination 'generic/platform=iOS' -archivePath "$RUNNER_TEMP/LuckyBarSlot.xcarchive" \
+            DEVELOPMENT_TEAM="$TEAM" CURRENT_PROJECT_VERSION="${{ github.run_number }}" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            archive > archive.log 2>&1 || report archive.log
+          grep -q "ARCHIVE SUCCEEDED" archive.log || report archive.log
+          codesign -f -s - "$RUNNER_TEMP/LuckyBarSlot.xcarchive/Products/Applications/App.app"
+
+          cat > "$RUNNER_TEMP/ExportOptions.plist" <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>method</key><string>app-store-connect</string>
+            <key>destination</key><string>upload</string>
+            <key>teamID</key><string>$TEAM</string>
+            <key>signingStyle</key><string>automatic</string>
+          </dict></plist>
+          EOF
+          xcodebuild -exportArchive -archivePath "$RUNNER_TEMP/LuckyBarSlot.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" -exportPath "$RUNNER_TEMP/export" "${AUTH[@]}" > export.log 2>&1 || report export.log
+          grep -qE "EXPORT SUCCEEDED|Upload succeeded|Uploaded" export.log || report export.log
+          echo "::notice title=TestFlight::Build ${{ github.run_number }} uploaded. Apple usually needs 10-30 minutes to process it."
+
+      - name: Keep the build logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-build-log
+          path: ios/App/*.log
+          if-no-files-found: ignore

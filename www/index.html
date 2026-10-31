@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#b31206">
+<title>Máy BAR Trái Cây</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+:root{
+  --cab1:#ffcf1f; --cab2:#ff7a00; --cab3:#d81e05;
+  --panel:#1c1c1c; --cell:#f4f4ee; --cellb:#c9c9bd;
+  --led:#ff2a1a;color-scheme:dark; --ledoff:#3a0805; --blue:#1f6fd1;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial Black",Arial,Helvetica,sans-serif;overflow:hidden;touch-action:manipulation}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  background:radial-gradient(ellipse at 50% 0%,#ffe36b 0%,#ffb000 28%,#ff6a00 55%,#c41200 85%,#7a0800 100%);padding-block:max(6px,env(safe-area-inset-top)) max(6px,env(safe-area-inset-bottom));padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+#machine{width:min(100%,520px);display:flex;flex-direction:column;gap:6px;height:100%}
+
+/* ---------- screen ---------- */
+#screen{background:var(--panel);border-radius:10px;padding:6px;box-shadow:0 0 0 3px #fff4,0 6px 18px #0008;position:relative}
+#leds{display:flex;justify-content:space-between;gap:8px;margin-bottom:5px}
+.ledbox{flex:1;display:flex;flex-direction:column;align-items:center}
+.ledbox label{font-size:10px;letter-spacing:1px;color:#ffd2c8;background:linear-gradient(#e2361f,#8e1306);padding:1px 10px;border-radius:8px 8px 0 0;clip-path:polygon(8% 0,92% 0,100% 100%,0 100%)}
+.seg{font-family:"DSEG7","Courier New",monospace;background:#120201;color:var(--led);text-shadow:0 0 6px #ff3b1f,0 0 1px #fff;border:2px solid #5a0c05;border-radius:4px;padding:1px 6px;font-size:clamp(20px,6.4vw,32px);font-weight:700;letter-spacing:2px;width:100%;text-align:right;position:relative}
+.seg::before{content:attr(data-ghost);position:absolute;right:6px;color:var(--ledoff);text-shadow:none;z-index:0}
+.seg span{position:relative;z-index:1}
+
+#board{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:repeat(7,1fr);gap:2px;aspect-ratio:1/1;background:#b8c46a;border:3px solid #d9e07a;border-radius:3px;position:relative}
+.cell{background:var(--cell);border:1px solid var(--cellb);position:relative;display:flex;align-items:center;justify-content:center;overflow:visible}
+.cell svg.icon{width:88%;height:88%;filter:drop-shadow(0 1px 0 #0003)}
+.cell .lamp{position:absolute;width:24%;height:24%;border-radius:3px;background:var(--lc,#600);box-shadow:inset 0 0 0 1px #0007,inset 0 -2px 3px #0006;opacity:.55;z-index:3}
+.cell.on{background:#fff;box-shadow:inset 0 0 0 3px #ff2,0 0 14px 4px #ffef7a;z-index:4}
+.cell.on .lamp{opacity:1;background:#fff36a;box-shadow:0 0 10px 4px #ffeb3b,inset 0 0 0 1px #fff}
+.cell.hit{animation:hit .25s steps(2) infinite}
+@keyframes hit{50%{background:#ffe8a0}}
+
+#center{grid-column:2/7;grid-row:2/7;background:linear-gradient(160deg,#2c7be5,#1b4fb0);border:2px solid #0d2c66;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+#center{background:#0b2a7a}
+#fx{position:absolute;inset:0;width:100%;height:100%;display:block}
+#logo{position:absolute;left:8%;top:0;width:84%;height:84%;z-index:1;filter:drop-shadow(0 2px 3px #0008)}
+#logo .glow{animation:glow 1.6s ease-in-out infinite alternate;transform-origin:50px 40px}
+@keyframes glow{to{opacity:.55;transform:scale(1.08)}}
+.orbit{position:absolute;inset:0;z-index:1;pointer-events:none}
+.fl{position:absolute;width:16%;aspect-ratio:1/1;left:42%;top:40%;animation:orbit 9s linear infinite;animation-delay:calc(var(--i) * -1.5s)}
+.fl svg{width:100%;height:100%;filter:drop-shadow(0 2px 2px #0009);animation:bob 1.2s ease-in-out infinite alternate}
+@keyframes orbit{
+  0%{transform:translate(-220%,-40%) scale(.85);z-index:2}
+  25%{transform:translate(0,95%) scale(1.05)}
+  50%{transform:translate(220%,-40%) scale(.85)}
+  75%{transform:translate(0,-175%) scale(.5);opacity:.45}
+  100%{transform:translate(-220%,-40%) scale(.85)}}
+@keyframes bob{to{transform:translateY(-8%) rotate(8deg)}}
+#center.hot .fl{animation-duration:2.4s}
+@media (prefers-reduced-motion:reduce){.fl,.fl svg,#logo .glow{animation:none}
+  .fl{transform:translate(var(--sx),var(--sy)) scale(.85)}}
+#mid{position:absolute;left:50%;top:83%;transform:translate(-50%,-50%);z-index:2;background:#120201;border:2px solid #600;border-radius:3px;padding:0 4px;font-family:"Courier New",monospace;font-weight:900;font-size:clamp(22px,7vw,36px);color:var(--led);text-shadow:0 0 6px #ff3b1f;min-width:2.2em;text-align:center}
+#banner{position:absolute;left:0;right:0;top:6%;text-align:center;z-index:2;font-size:clamp(14px,4.4vw,22px);color:#fff;text-shadow:0 2px 0 #c00,0 0 8px #000;opacity:0;transition:opacity .2s}
+#banner.show{opacity:1;animation:pulse .4s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.12)}}
+
+/* bet LED row */
+#betrow{display:grid;grid-template-columns:repeat(8,1fr);gap:2px;margin-top:5px}
+.bet{background:#300;border:1px solid #6a1206;border-radius:3px;display:flex;flex-direction:column;align-items:center;padding:1px 0 2px}
+.bet .mul{font-size:10px;color:#ffe;background:#c2410c;width:100%;text-align:center;line-height:13px}
+.bet .mi{width:70%;aspect-ratio:1/1}
+.bet .mi svg{width:100%;height:100%}
+.bet .bv{font-family:"Courier New",monospace;font-weight:900;color:var(--led);text-shadow:0 0 5px #f30;font-size:clamp(14px,4.4vw,20px);line-height:1}
+
+/* ---------- control panel ---------- */
+#panel{flex:1;min-height:0;background:linear-gradient(#ff8a00,#e23a00 50%,#b31206);border-radius:14px 14px 8px 8px;padding:8px 6px;box-shadow:inset 0 3px 0 #ffd37a,0 6px 18px #0008;display:flex;flex-direction:column;justify-content:space-around;gap:6px}
+.row{display:grid;gap:5px}
+.r1{grid-template-columns:repeat(8,1fr)}
+/* nút 3D: viền kim loại, mặt cầu bóng, bóng đổ và hiệu ứng lún khi bấm */
+.btn{--face:#ff3d8b;--deep:#b10c4f;--rim:#ffd6e8;--edge:#5a0628;
+  border:none;border-radius:50%;aspect-ratio:1/1;width:100%;max-width:62px;margin:0 auto;display:block;cursor:pointer;position:relative;
+  background:radial-gradient(circle at 36% 26%,#fff 0 4%,var(--rim) 12%,var(--face) 46%,var(--deep) 82%,#6d0530 100%);
+  box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),inset 0 2px 3px rgba(255,255,255,.55),0 6px 0 var(--edge),0 10px 14px #0008;
+  transition:transform .05s,box-shadow .05s}
+.btn::before{content:"";position:absolute;inset:6% 12% 52% 14%;border-radius:50%;background:linear-gradient(#ffffffd9,#ffffff00);pointer-events:none}
+.btn::after{content:"";position:absolute;inset:-4px;border-radius:50%;border:2px solid #fff3;pointer-events:none}
+.btn:active,.btn.press{transform:translateY(4px);box-shadow:inset 0 -2px 0 rgba(0,0,0,.25),inset 0 2px 3px rgba(255,255,255,.35),0 2px 0 var(--edge),0 4px 6px #0007}
+.btn.orange{--face:#ff9419;--deep:#d45a00;--rim:#ffe9c2;--edge:#8a3600}
+.btn.lit{box-shadow:inset 0 -5px 0 rgba(0,0,0,.28),0 6px 0 var(--edge),0 0 16px 6px #fff8}
+.lbl{display:block;text-align:center;font-size:9.5px;color:#fff;background:#1d2a8a;border:1px solid #9bb3ff;border-radius:3px;margin:0 auto 3px;padding:1px 0;width:100%;max-width:62px;white-space:nowrap;overflow:hidden}
+.ic{width:100%;max-width:40px;aspect-ratio:1/1;margin:0 auto 3px;background:linear-gradient(160deg,#ffffff,#e4e0cc);border-radius:6px;padding:2px;border:1px solid #0003;box-shadow:inset 0 -3px 0 #0002,inset 0 2px 0 #fff,0 3px 0 #8f8a72,0 5px 6px #0005}
+.ic::after{content:"";position:absolute;left:10%;top:6%;width:40%;height:22%;border-radius:50%;background:linear-gradient(#fff,#fff0);opacity:.7;pointer-events:none}
+.ic{position:relative}
+.cell{background:linear-gradient(160deg,#fffef8,#e6e4d4);box-shadow:inset 0 -3px 0 #0001,inset 0 1px 0 #fff}
+.cell svg.icon{filter:drop-shadow(0 3px 2px #0005) drop-shadow(0 0 1px #fff8)}
+.ic svg{filter:drop-shadow(0 2px 1px #0004)}
+.ic svg{width:100%;height:100%}
+#coinbar{display:flex;gap:8px;align-items:center;justify-content:center}
+#coin{flex:1;max-width:220px;border:none;border-radius:8px;padding:10px;background:linear-gradient(#e6e6e6,#9a9a9a);color:#222;font-weight:900;font-size:14px;box-shadow:0 4px 0 #555}
+#coin:active{transform:translateY(3px);box-shadow:0 1px 0 #555}
+#mute{border:none;border-radius:8px;padding:10px 12px;background:#222;color:#fff;font-size:14px}
+#help{border:none;border-radius:8px;padding:10px 12px;background:#1d2a8a;color:#fff;font-size:14px;font-weight:900}
+#rules{position:fixed;inset:0;background:#000c;display:none;z-index:50;padding:16px;overflow:auto}
+#rules.show{display:block}
+#rules .box{max-width:520px;margin:0 auto;background:#fff8e6;color:#222;border-radius:12px;padding:14px 16px;font-family:Arial,sans-serif;font-size:14px;line-height:1.45}
+#rules h2{margin:.2em 0 .4em;color:#b31206}
+#rules table{border-collapse:collapse;width:100%}
+#rules td{border-bottom:1px solid #ddd;padding:3px 4px}
+#rules button{margin-top:10px;width:100%;padding:12px;border:none;border-radius:8px;background:#b31206;color:#fff;font-weight:900;font-size:16px}
+/* mặt máy bằng ảnh gốc */
+#board.skin{background:#000;overflow:hidden}
+#skinImg{position:absolute;max-width:none;z-index:0;pointer-events:none}
+#board.skin .cell{background:rgba(0,0,0,.22);border-color:transparent;z-index:1}
+#board.skin .cell svg.icon,#board.skin .cell .lamp{display:none}
+#board.skin .cell.on{background:rgba(255,245,170,.38);box-shadow:inset 0 0 0 2px #fff8,0 0 16px 6px #ffe96a}
+#board.skin #center{background:transparent;border-color:transparent;z-index:1}
+#board.skin #center #fx,#board.skin #center #logo,#board.skin #center .orbit{display:none}
+#setupBtn{border:none;border-radius:8px;padding:10px 12px;background:#1d2a8a;color:#fff;font-size:14px}
+#setup{position:fixed;left:0;right:0;bottom:0;max-height:58%;overflow:auto;z-index:55;display:none;background:#fff8e6;color:#222;border-radius:14px 14px 0 0;box-shadow:0 -6px 24px #000a;
+  padding:12px max(16px,env(safe-area-inset-right,0px)) max(14px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));font-family:Arial,sans-serif;font-size:13px;line-height:1.4}
+#setup.show{display:block}
+#setup{color-scheme:light}
+#setup h2{margin:0 0 4px;font-size:16px;color:#b31206}
+#setup h3{margin:10px 0 4px;font-size:14px}
+#setup .sl{display:grid;grid-template-columns:5.5em 1fr 3em;gap:6px;align-items:center}
+#setup input[type=number]{width:4.6em;padding:3px;font-size:13px}
+#setup table{border-collapse:collapse;width:100%}
+#setup td{padding:2px 3px;border-bottom:1px solid #e5d9bd}
+#setup td button,#setup .row2 button{border:none;border-radius:6px;background:#1d2a8a;color:#fff;padding:5px 9px;font-size:13px}
+#setup .row2{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+#setup .note{color:#666;font-size:12px}
+#closeSetup{margin-top:10px;width:100%;padding:11px;border:none;border-radius:8px;background:#b31206;color:#fff;font-weight:900;font-size:15px}
+/* quảng cáo mẫu và cổng nạp tiền */
+#ad,#gate{position:fixed;inset:0;z-index:70;display:none;align-items:center;justify-content:center;background:#000d;padding:16px}
+#ad.show,#gate.show{display:flex}
+.adbox,.gbox{width:min(100%,360px);background:#fff8e6;color:#222;border-radius:14px;padding:16px;font-family:Arial,sans-serif;box-shadow:0 10px 30px #000}
+.adtag{font-size:11px;letter-spacing:2px;color:#666;text-align:center}
+.adcard{background:linear-gradient(135deg,#1d2a8a,#c0125a);color:#fff;border-radius:10px;padding:28px 14px;margin:8px 0;display:flex;flex-direction:column;gap:6px;text-align:center}
+.adnum{font-weight:900;text-align:center;font-size:16px}
+.gbox h2{margin:0 0 6px;color:#b31206;font-size:18px}
+.gbox p{margin:0 0 10px;font-size:14px;line-height:1.4}
+.gbox button{display:block;width:100%;margin:8px 0;padding:12px;border:none;border-radius:8px;background:#b31206;color:#fff;font-weight:900;font-size:15px;box-shadow:0 4px 0 #6d0a03}
+.gbox button.ghost{background:#ddd;color:#222;box-shadow:0 4px 0 #999}
+.gbox button.pro{background:linear-gradient(#ffe36b,#ff9a00);color:#5a1a00;box-shadow:0 4px 0 #8a4b00}
+#gateMsg{font-size:13px;color:#555;min-height:1em}
+#start-overlay{position:fixed;inset:0;z-index:60;background:#000b;display:flex;align-items:center;justify-content:center}
+#start-overlay button{padding:18px 28px;font-size:20px;font-weight:900;border:none;border-radius:14px;background:linear-gradient(#ffe36b,#ff7a00);color:#7a0800;box-shadow:0 6px 0 #7a0800}
+</style>
+</head>
+<body>
+<div id="app"><div id="machine">
+  <div id="screen">
+    <div id="leds">
+      <div class="ledbox"><label>BONUS-WIN</label><div class="seg" id="winLed" data-ghost="88888"><span>0</span></div></div>
+      <div class="ledbox"><label>CREDIT</label><div class="seg" id="credLed" data-ghost="88888"><span>0</span></div></div>
+    </div>
+    <div id="board"></div>
+    <div id="betrow"></div>
+  </div>
+  <div id="panel">
+    <div class="row r1" id="funcRow"></div>
+    <div class="row r1" id="betBtnRow"></div>
+    <div id="coinbar">
+      <button id="help">?</button>
+      <button id="coin">TOP UP (+100)</button>
+      <button id="setupBtn" aria-label="Hình và âm thanh gốc">🎛</button>
+      <button id="mute">🔊</button>
+    </div>
+  </div>
+</div></div>
+
+<div id="rules"><div class="box">
+  <h2>Luật chơi Máy BAR trái cây (小瑪莉)</h2>
+  <p><b>1. Nạp xu</b> – mỗi lần bấm NẠP XU được +10 điểm (CREDIT).</p>
+  <p><b>2. Đặt cược</b> – bấm 8 nút cam phía dưới (BAR, 77, Sao, Dưa hấu, Chuông, Xoài, Cam, Táo). Mỗi lần bấm cược 1 điểm vào ô đó (tối đa 99/ô).</p>
+  <p><b>3. START</b> – đèn chạy quanh 24 ô rồi dừng. Đèn dừng ở trái cây nào bạn có cược thì thắng = <i>cược × tỉ lệ</i>. Ô "nhỏ" (3 hình nhỏ trong khối) trả ×3 (BAR nhỏ trả ×50).</p>
+  <table>
+    <tr><td>BAR</td><td>×120 (nhỏ ×50)</td></tr>
+    <tr><td>77</td><td>×40</td></tr><tr><td>Sao đôi</td><td>×30</td></tr>
+    <tr><td>Dưa hấu</td><td>×20</td></tr><tr><td>Chuông</td><td>×20</td></tr>
+    <tr><td>Xoài</td><td>×15</td></tr><tr><td>Cam</td><td>×10</td></tr><tr><td>Táo</td><td>×5</td></tr>
+  </table>
+  <p><b>4. Ô may mắn 機會 / 運命</b> – đèn dừng ở đây sẽ ra một trong các kết quả: <br>
+  • <b>Ăn đèn</b> (không trúng gì)<br>
+  • <b>Tặng đèn</b> (送燈): chạy thêm 1–3 đèn, mỗi đèn đều được trả thưởng<br>
+  • <b>Tiểu Tam Nguyên</b> (小三元): Cam + Xoài + Chuông lớn<br>
+  • <b>Đại Tam Nguyên</b> (大三元): Dưa hấu + Sao + 77 lớn<br>
+  • <b>Đại Tứ Hỷ</b> (大四喜): cả 4 quả Táo lớn<br>
+  • <b>Tung Hoành Tứ Hải</b> (縱橫四海): 4 ô góc<br>
+  • <b>Chạy tàu</b> (開火車): một đoàn 3–6 đèn liền nhau<br>
+  • <b>Thiên Nữ Tán Hoa</b> (天女散花): 4–6 đèn ngẫu nhiên</p>
+  <p><b>5. Thắng điểm</b> nằm ở BONUS-WIN. Bấm <b>WIN</b> để lấy về CREDIT, hoặc chơi <b>BIG / SMALL</b> gấp đôi: số giữa màn hình chạy 1–14; 1–6 là SMALL, 8–14 là BIG, ra 7 thì mất. Đoán đúng ×2. Nút <b>◄ ►</b> chuyển từng điểm giữa WIN và CREDIT để chơi gấp đôi một phần.</p>
+  <p><b>6.</b> Sau mỗi ván, mức cược được giữ – chỉ cần bấm START để cược lại y như cũ. <b>PAY</b> = trả xu (đưa CREDIT về 0).</p>
+  <p style="font-size:12px;color:#666">Trò chơi giải trí, điểm không có giá trị quy đổi.</p>
+  <button id="closeRules">ĐÓNG</button>
+</div></div>
+<div id="setup">
+  <h2>Hình &amp; âm thanh gốc của máy</h2>
+  <div class="note">Nạp ảnh chụp thẳng mặt máy và file ghi âm (hoặc video) của máy. File chỉ lưu trong trình duyệt của bạn, không gửi đi đâu.</div>
+  <h3>Ảnh mặt máy</h3>
+  <div class="row2"><input type="file" id="imgFile" accept="image/*"><label><input type="checkbox" id="useSkin"> Dùng ảnh</label></div>
+  <div class="note">Kéo 4 thanh để khung 7×7 ô trùng khít với 24 ô trên ảnh (nhìn bàn đèn phía trên).</div>
+  <div class="sl"><span>Trái</span><input type="range" id="cx" min="0" max="100" step="0.1" value="0"><output id="cxo">0</output></div>
+  <div class="sl"><span>Trên</span><input type="range" id="cy" min="0" max="100" step="0.1" value="0"><output id="cyo">0</output></div>
+  <div class="sl"><span>Rộng</span><input type="range" id="cw" min="5" max="100" step="0.1" value="100"><output id="cwo">100</output></div>
+  <div class="sl"><span>Cao</span><input type="range" id="ch" min="5" max="100" step="0.1" value="100"><output id="cho">100</output></div>
+  <h3>Âm thanh</h3>
+  <div class="row2"><input type="file" id="audFile" accept="audio/*,video/*"><label><input type="checkbox" id="useAudio"> Dùng âm gốc</label></div>
+  <div class="note" id="audInfo">Chưa nạp file.</div>
+  <div class="sl"><span>Âm lượng</span><input type="range" id="vol" min="0.5" max="10" step="0.1" value="3"><output id="volo">3</output></div>
+  <div class="note">Mỗi sự kiện phát đoạn [bắt đầu → kết thúc] (giây) trong file. Mốc điền sẵn là vị trí đo được trong video máy BAR đã gửi; để trống = dùng âm tổng hợp.</div>
+  <table id="clipTable"></table>
+  <button id="closeSetup">XONG</button>
+</div>
+<div id="ad">
+  <div class="adbox">
+    <div class="adtag">QUẢNG CÁO</div>
+    <div class="adcard"><b>Quảng cáo mẫu</b><span>Thay bằng quảng cáo thật khi nối với SDK quảng cáo</span></div>
+    <div class="adnum">Nhận lượt nạp sau <span id="adcount">5</span> giây</div>
+  </div>
+</div>
+<div id="gate">
+  <div class="gbox">
+    <h2>Hết 3 lượt TOP UP</h2>
+    <p>Xem một quảng cáo ngắn để mở thêm 3 lượt nạp (mỗi lượt +100), hoặc mua bản Pro để nạp không giới hạn.</p>
+    <button id="gateAd">📺 Xem quảng cáo</button>
+    <button id="gatePro" class="pro">⭐ Mua bản Pro</button>
+    <div id="gateMsg"></div>
+    <button id="gateClose" class="ghost">Để sau</button>
+  </div>
+</div>
+<div id="start-overlay"><button id="go">▶ BẬT MÁY</button></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   ICONS (SVG, viewBox 0 0 100 100) — vẽ lại theo mặt máy trong video
+   ===================================================================== */
+const SV = (inner, vb = "0 0 100 100") => `<svg class="icon" viewBox="${vb}" xmlns="http://www.w3.org/2000/svg">${inner}</svg>`;
+const ART = {
+  apple: `
+    <defs><radialGradient id="ga" cx="35%" cy="35%" r="70%"><stop offset="0" stop-color="#ff8a80"/><stop offset=".45" stop-color="#e2160f"/><stop offset="1" stop-color="#8a0703"/></radialGradient></defs>
+    <path d="M50 30 C35 18 12 24 13 50 C14 74 32 92 44 88 C48 86 52 86 56 88 C68 92 86 74 87 50 C88 24 65 18 50 30Z" fill="url(#ga)" stroke="#5c0402" stroke-width="2"/>
+    <path d="M50 30 C50 22 52 14 57 8" stroke="#4a2b10" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M54 20 C62 6 80 8 84 14 C74 22 62 24 54 20Z" fill="#3fa535" stroke="#1d5e17" stroke-width="2"/>
+    <ellipse cx="30" cy="44" rx="7" ry="11" fill="#fff" opacity=".55" transform="rotate(20 30 44)"/>`,
+  orange: `
+    <defs><radialGradient id="go" cx="38%" cy="35%" r="70%"><stop offset="0" stop-color="#ffd27a"/><stop offset=".5" stop-color="#ff8c00"/><stop offset="1" stop-color="#c24e00"/></radialGradient>
+    <pattern id="po" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="3" cy="3" r=".9" fill="#b04400" opacity=".45"/></pattern></defs>
+    <circle cx="50" cy="54" r="38" fill="url(#go)" stroke="#8a3300" stroke-width="2"/>
+    <circle cx="50" cy="54" r="38" fill="url(#po)"/>
+    <path d="M50 18 l-4 -6 M50 18 l4 -6" stroke="#3b6e18" stroke-width="3"/>
+    <circle cx="50" cy="18" r="3.5" fill="#4d8a1f"/>
+    <ellipse cx="36" cy="40" rx="8" ry="6" fill="#fff" opacity=".5"/>`,
+  mango: `
+    <defs><radialGradient id="gm" cx="35%" cy="35%" r="75%"><stop offset="0" stop-color="#a6f1e8"/><stop offset=".45" stop-color="#20b39a"/><stop offset="1" stop-color="#0b5c62"/></radialGradient></defs>
+    <path d="M14 58 C8 36 32 18 58 20 C82 22 94 40 88 58 C82 76 56 84 38 80 C24 77 17 68 14 58Z" fill="url(#gm)" stroke="#063b3e" stroke-width="2.5"/>
+    <path d="M86 46 C92 42 95 38 96 34" stroke="#2d4d12" stroke-width="4" stroke-linecap="round"/>
+    <ellipse cx="38" cy="40" rx="13" ry="6" fill="#fff" opacity=".55" transform="rotate(-12 38 40)"/>`,
+  bell: `
+    <defs><linearGradient id="gb" x1="0" x2="1"><stop offset="0" stop-color="#8a6200"/><stop offset=".3" stop-color="#ffe066"/><stop offset=".55" stop-color="#f2b800"/><stop offset="1" stop-color="#7a5300"/></linearGradient></defs>
+    <rect x="44" y="6" width="12" height="12" rx="3" fill="#5b4a2a" stroke="#2e2412" stroke-width="2"/>
+    <path d="M50 16 C30 16 26 34 26 52 C26 64 20 72 12 78 L88 78 C80 72 74 64 74 52 C74 34 70 16 50 16Z" fill="url(#gb)" stroke="#5c4200" stroke-width="2.5"/>
+    <rect x="10" y="76" width="80" height="9" rx="4" fill="#c99600" stroke="#5c4200" stroke-width="2"/>
+    <circle cx="50" cy="90" r="7" fill="#4a3a1a" stroke="#221a08" stroke-width="2"/>
+    <path d="M38 26 C34 36 34 50 34 60" stroke="#fff" stroke-width="4" opacity=".55" stroke-linecap="round" fill="none"/>`,
+  melon: `
+    <defs><clipPath id="cw"><circle cx="50" cy="50" r="40"/></clipPath></defs>
+    <circle cx="50" cy="50" r="41" fill="#1d7a1d" stroke="#0b3d0b" stroke-width="2"/>
+    <g clip-path="url(#cw)" stroke="#0e4d0e" stroke-width="6" fill="none">
+      <path d="M20 5 C10 40 10 60 20 95"/><path d="M40 5 C32 40 32 60 40 95"/><path d="M60 5 C68 40 68 60 60 95"/><path d="M80 5 C90 40 90 60 80 95"/>
+    </g>
+    <path d="M18 50 A32 30 0 0 0 82 50 Z" fill="#fff" opacity=".9"/>
+    <path d="M22 50 A28 26 0 0 0 78 50 Z" fill="#e8172b"/>
+    <g fill="#111"><ellipse cx="38" cy="58" rx="2.4" ry="3.6"/><ellipse cx="50" cy="64" rx="2.4" ry="3.6"/><ellipse cx="62" cy="58" rx="2.4" ry="3.6"/><ellipse cx="44" cy="70" rx="2" ry="3"/><ellipse cx="56" cy="70" rx="2" ry="3"/></g>
+    <path d="M14 50 L86 50" stroke="#0b3d0b" stroke-width="2.5"/>`,
+  star: `
+    <defs><linearGradient id="gs" y2="1" x2="0"><stop offset="0" stop-color="#fff59a"/><stop offset="1" stop-color="#f2c300"/></linearGradient></defs>
+    <g stroke="#2f6b12" stroke-width="3.5" stroke-linejoin="round" fill="url(#gs)">
+      <path d="M27 30 l5.6 11.4 12.6 1.8 -9.1 8.9 2.2 12.5 -11.3 -5.9 -11.3 5.9 2.2 -12.5 -9.1 -8.9 12.6 -1.8Z" transform="translate(0 6)"/>
+      <path d="M73 30 l5.6 11.4 12.6 1.8 -9.1 8.9 2.2 12.5 -11.3 -5.9 -11.3 5.9 2.2 -12.5 -9.1 -8.9 12.6 -1.8Z" transform="translate(0 6)"/>
+    </g>`,
+  seven: `
+    <defs><linearGradient id="g7" y2="1" x2="0"><stop offset="0" stop-color="#ff5a4a"/><stop offset="1" stop-color="#b80c00"/></linearGradient></defs>
+    <g fill="url(#g7)" stroke="#3a0200" stroke-width="3" stroke-linejoin="round">
+      <path d="M8 18 H46 V28 C38 42 32 60 30 84 H16 C18 62 24 44 32 30 H8Z"/>
+      <path d="M54 18 H92 V28 C84 42 78 60 76 84 H62 C64 62 70 44 78 30 H54Z"/>
+    </g>`,
+  bar: `
+    <g font-family="Arial Black,Arial" font-weight="900" font-size="19" text-anchor="middle">
+      ${[8,38,68].map(y=>`<rect x="14" y="${y}" width="72" height="25" rx="3" fill="#111" stroke="#444" stroke-width="2"/><rect x="18" y="${y+3}" width="64" height="19" fill="#fff"/><text x="50" y="${y+19}" fill="#111" letter-spacing="2">BAR</text>`).join("")}
+    </g>`,
+};
+// ô nhỏ: 3 khối lập phương xếp tháp, mỗi khối có 1 hình nhỏ
+const cube = (x, y, s, art) => `
+  <g transform="translate(${x} ${y})">
+    <path d="M0 ${s*0.25} L${s*0.25} 0 H${s*1.25} V${s} L${s} ${s*1.25} H0Z" fill="#e9e9e2" stroke="#888" stroke-width="1.6"/>
+    <path d="M0 ${s*0.25} L${s*0.25} 0 H${s*1.25} L${s} ${s*0.25}Z" fill="#fafaf5" stroke="#888" stroke-width="1.6"/>
+    <path d="M${s} ${s*0.25} L${s*1.25} 0 V${s} L${s} ${s*1.25}Z" fill="#cfcfc6" stroke="#888" stroke-width="1.6"/>
+    <rect x="0" y="${s*0.25}" width="${s}" height="${s}" fill="#f6f6f0" stroke="#888" stroke-width="1.6"/>
+    <svg x="${s*0.08}" y="${s*0.33}" width="${s*0.84}" height="${s*0.84}" viewBox="0 0 100 100">${art}</svg>
+  </g>`;
+const smallArt = k => cube(30, 2, 36, ART[k]) + cube(6, 48, 36, ART[k]) + cube(52, 48, 36, ART[k]);
+const luckyArt = (kanji, mark, col) => `
+  <text x="30" y="44" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" font-weight="900" font-size="30" text-anchor="middle" fill="#222">${kanji[0]}</text>
+  <text x="30" y="82" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" font-weight="900" font-size="30" text-anchor="middle" fill="#222">${kanji[1]}</text>
+  <text x="72" y="80" font-family="Arial Black" font-weight="900" font-size="70" text-anchor="middle" fill="${col}" stroke="#111" stroke-width="2.5">${mark}</text>`;
+
+// unique gradient ids per instance (SVG ids are global in the document)
+let uid = 0;
+function icon(inner) {
+  const n = ++uid;
+  return SV(inner.replace(/id="(\w+)"/g, `id="$1_${n}"`).replace(/url\(#(\w+)\)/g, `url(#$1_${n})`));
+}
+
+/* =====================================================================
+   LUẬT / BẢNG TRẢ THƯỞNG
+   ===================================================================== */
+// thứ tự 8 nút cược (trái → phải) giống bảng đèn dưới màn hình máy
+const FRUITS = ["bar", "seven", "star", "melon", "bell", "mango", "orange", "apple"];
+const PAY    = { bar: 120, seven: 40, star: 30, melon: 20, bell: 20, mango: 15, orange: 10, apple: 5 };
+const SMALL_PAY = { bar: 50, seven: 3, star: 3, melon: 3, bell: 3, mango: 3, orange: 3, apple: 3 };
+const VN = { bar: "BAR", seven: "77", star: "Sao", melon: "Dưa hấu", bell: "Chuông", mango: "Xoài", orange: "Cam", apple: "Táo" };
+
+// 24 ô theo chiều kim đồng hồ, bắt đầu từ góc trên-trái (đúng bố cục máy trong video)
+const RING = [
+  ["orange"], ["bell"], ["bar", 1], ["bar"], ["apple"], ["apple", 1], ["mango"],      // hàng trên
+  ["melon"], ["melon", 1], ["lucky", "機會"], ["apple"], ["orange", 1],                // cột phải
+  ["orange"], ["bell"], ["seven", 1], ["seven"], ["apple"], ["mango", 1], ["mango"],  // hàng dưới (phải→trái)
+  ["star"], ["star", 1], ["lucky", "運命"], ["apple"], ["bell", 1],                    // cột trái (dưới→trên)
+].map(([f, x], i) => ({ i, f, small: x === 1, name: typeof x === "string" ? x : null }));
+
+const gridPos = i => i <= 6 ? [0, i] : i <= 11 ? [i - 6, 6] : i <= 18 ? [6, 18 - i] : [24 - i, 0];
+const cellPay = c => c.f === "lucky" ? 0 : (c.small ? SMALL_PAY[c.f] : PAY[c.f]);
+
+// Xác suất dừng của mỗi ô: tỉ lệ nghịch với tiền thưởng (≈ cách máy thật cân bằng)
+const P_LUCKY = 0.10;
+const WEIGHTS = (() => {
+  const raw = RING.map(c => c.f === "lucky" ? 0 : (c.small ? 0.35 : 1) / cellPay(c));
+  const s = raw.reduce((a, b) => a + b, 0);
+  return raw.map((w, i) => RING[i].f === "lucky" ? P_LUCKY / 2 : w / s * (1 - P_LUCKY));
+})();
+function pickCell(exclude = []) {
+  let r = Math.random() * WEIGHTS.reduce((a, w, i) => a + (exclude.includes(i) ? 0 : w), 0);
+  for (let i = 0; i < 24; i++) { if (exclude.includes(i)) continue; r -= WEIGHTS[i]; if (r <= 0) return i; }
+  return 4;
+}
+const LUCKY_EVENTS = [
+  ["eat", 34], ["send", 28], ["xiaosanyuan", 8], ["dasanyuan", 5], ["dasixi", 5], ["sihai", 4], ["train", 10], ["sanhua", 6],
+];
+const LUCKY_NAME = {
+  eat: "ĂN ĐÈN", send: "送燈 TẶNG ĐÈN", xiaosanyuan: "小三元 TIỂU TAM NGUYÊN", dasanyuan: "大三元 ĐẠI TAM NGUYÊN",
+  dasixi: "大四喜 ĐẠI TỨ HỶ", sihai: "縱橫四海 TỨ HẢI", train: "開火車 CHẠY TÀU", sanhua: "天女散花 TÁN HOA",
+};
+
+/* =====================================================================
+   ÂM THANH — tổng hợp sóng vuông kiểu chip âm thanh của máy
+   (giai điệu & cao độ dựng lại từ phân tích phổ của video)
+   ===================================================================== */
+const Snd = (() => {
+  let ctx, master, muted = false;
+  const N = n => 440 * Math.pow(2, (n - 69) / 12);
+  const NOTE = s => { const m = /^([A-G])(#?)(\d)$/.exec(s); return 12 * (+m[3] + 1) + { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (m[2] ? 1 : 0); };
+  function init() {
+    if (ctx) return;
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+    master = ctx.createGain(); master.gain.value = 0.22;
+    const lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 6500; // loa nhỏ trong thùng máy
+    master.connect(lp); lp.connect(ctx.destination);
+  }
+  function tone(freq, t, dur, { type = "square", vol = 1, slide = 0, duty = null } = {}) {
+    if (!ctx || muted) return;
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    if (duty !== null) o.setPeriodicWave(pulse(duty)); else o.type = type;
+    o.frequency.setValueAtTime(freq, t);
+    if (slide) o.frequency.linearRampToValueAtTime(freq * slide, t + dur);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.004);
+    g.gain.setValueAtTime(vol, t + Math.max(0.005, dur - 0.012));
+    g.gain.linearRampToValueAtTime(0, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+  }
+  const waves = {};
+  function pulse(d) { // sóng xung (duty cycle) – âm sắc giống IC âm thanh cũ
+    if (waves[d]) return waves[d];
+    const n = 40, re = new Float32Array(n), im = new Float32Array(n);
+    for (let k = 1; k < n; k++) im[k] = (2 / (k * Math.PI)) * Math.sin(k * Math.PI * d);
+    return (waves[d] = ctx.createPeriodicWave(re, im));
+  }
+  // phát chuỗi nốt: [[note|null, beats], ...]
+  function seq(notes, bpmBeat = 0.11, opts = {}) {
+    if (!ctx) return 0;
+    let t = ctx.currentTime + 0.02;
+    for (const [n, b] of notes) {
+      const d = b * bpmBeat;
+      if (n) for (const x of [].concat(n)) tone(N(NOTE(x)), t, d * 0.92, opts);
+      t += d;
+    }
+    return (t - ctx.currentTime) * 1000;
+  }
+  const now = () => ctx ? ctx.currentTime : 0;
+  // hai giọng chạy song song (giai điệu + bass) như IC nhạc 2 kênh của máy
+  function duet(mel, bass, step, opts = {}) {
+    if (!ctx) return 0;
+    const t0 = ctx.currentTime + 0.02;
+    for (const [part, vol] of [[mel, 1], [bass, 0.55]]) {
+      let t = t0;
+      for (const [n, b] of part) { if (n) tone(N(NOTE(n)), t, b * step * 0.9, { duty: vol === 1 ? .25 : .5, vol: vol * (opts.vol || 1) }); t += b * step; }
+    }
+    return Math.max(...[mel, bass].map(p => p.reduce((a, x) => a + x[1], 0))) * step * 1000 + 20;
+  }
+  let sweepTimer = null, sweepI = 0;
+  const SWEEP = ["G7", "F#7", "F7", "E7", "D#7", "D7", "C#7"];
+  // thang ngũ cung C trưởng (C5 → A6): ghép bất kỳ nốt nào cũng êm tai
+  const PENT = [523.25, 587.33, 659.25, 783.99, 880, 1046.5, 1174.66, 1318.51, 1567.98, 1760];
+  // mỗi nút một chuỗi nốt riêng (chỉ số trong PENT); không chuỗi nào trùng nhau
+  const BTN_NOTES = {
+    bet0: [0, 2, 5], bet1: [1, 3, 6], bet2: [2, 4, 7], bet3: [3, 5, 8],
+    bet4: [4, 6, 9], bet5: [0, 4, 8], bet6: [1, 5, 9], bet7: [2, 6, 3],
+    pay: [5, 3, 0], win: [0, 3, 5, 8], left: [4, 2], right: [2, 4],
+    small: [3, 1, 3], big: [6, 3, 6], start: [0, 2, 4, 5],
+  };
+  const synth = {
+    toggle() { muted = !muted; return muted },
+    // âm riêng cho từng nút: sóng tam giác, nhẹ và tròn
+    btnSound(k) {
+      const seq = BTN_NOTES[k]; if (!ctx || muted || !seq) return;
+      const t = now();
+      seq.forEach((n, i) => tone(PENT[n], t + i * 0.09, 0.2, { type: "triangle", vol: 0.32 }));
+    },
+    // ---- các âm dưới đây dựng lại theo phân tích phổ video gốc ----
+    // bấm nút cược: chuỗi nốt rải rất nhanh C#5–E5–B6–A4 (hợp âm A trưởng)
+    bet(idx = 0) {
+      const t = now(), hi = ["G#7", "D#7", "B6", "G#6", "F#6", "E6", "C#6", "A5"][idx];
+      [["C#5", 0], ["E5", .045], [hi, .09], ["A4", .135]].forEach(([n, d]) => tone(N(NOTE(n)), t + d, .05, { duty: .5, vol: .8 }));
+    },
+    // nạp điểm bằng chìa khóa: tiếng bíp ~1608 Hz (G6 cao 44 cent) mỗi lần cộng điểm
+    coin() { const t = now(); for (let i = 0; i < 4; i++) tone(1608, t + i * 0.11, 0.08, { duty: .5, vol: .8 }); },
+    deny() { tone(180, now(), 0.15, { type: "square", vol: .6 }); },
+    // bấm START: một tiếng cao kéo dài (~3.5 kHz)
+    start() { tone(N(NOTE("G#7")) * 1.025, now(), 0.55, { duty: .5, vol: .6 }); },
+    // đèn chạy nhanh: tiếng quét nửa cung đi xuống G7→C#7 lặp liên tục (~75ms/nốt)
+    sweepOn() {
+      if (sweepTimer || !ctx) return;
+      sweepI = 0;
+      sweepTimer = setInterval(() => { tone(N(NOTE(SWEEP[sweepI % 7])), now(), 0.07, { duty: .25, vol: .75 }); sweepI++; }, 75);
+    },
+    sweepOff() { clearInterval(sweepTimer); sweepTimer = null; },
+    // mỗi bước đèn khi tăng/giảm tốc: tick xen kẽ D7 / B6
+    tick(k) { tone(N(NOTE(k % 2 ? "B6" : "D7")), now(), 0.06, { duty: .25, vol: .85 }); },
+    // nhạc khi đèn dừng (rải D#–G#–A#–C# đi lên rồi xuống)
+    stop() {
+      return duet(
+        [["D#5",1],["G#5",1],["A#5",1],["C#6",1],["F#6",1],["D#6",1],["A#5",1],["G#5",1],["D#5",1],["D#6",1],["G#5",1],["F5",1],["F#6",1],["A#5",1],["G#5",2]],
+        [["D#4",4],["G#3",4],["D#4",4],["G#3",4]], 0.075);
+    },
+    // nhạc thắng: giai điệu ngũ cung F# (F#–G#–A#) trên bass G#/D#
+    win() {
+      return duet(
+        [["F#6",1],["G#6",1],["G#6",2],["D#6",1],["C#6",1],["F#6",1],["F#6",3],[null,2],["F#6",3],[null,1],
+         ["F#6",1],["F#6",1],["G#6",1],["A#6",1],["A#6",2],["F#6",1],["A#6",1],["G#6",1],["G#6",1],["A#6",2],["A#6",1],["D#6",1],
+         ["F#6",1],["A#6",3],["F#6",1],["A#6",1],["G#6",1],["G#6",1],["F#6",1],["A#6",1],["F#6",1],["G#6",1],["F#6",5]],
+        [["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],
+         ["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2],["D#4",2],["G#4",2]], 0.14);
+    },
+    bigWin() { const a = this.win(); setTimeout(() => this.win(), a); return a * 2; },
+    lose() { return seq([["E5",1],["C5",1],["A4",1],["F4",3]], 0.09, { duty: .5 }); },
+    // ô may mắn: quét lên–xuống liên tục
+    lucky() {
+      const t = now();
+      for (let r = 0; r < 3; r++) SWEEP.concat([...SWEEP].reverse()).forEach((n, i) => tone(N(NOTE(n)), t + (r * 14 + i) * 0.05, 0.045, { duty: .25, vol: .75 }));
+      return 2100;
+    },
+    eat() { return seq([["G5",1],["F#5",1],["F5",1],["E5",1],["D#5",4]], 0.08, { duty: .5 }); },
+    // đếm điểm thắng sang credit: bíp F#6
+    count() { tone(N(NOTE("F#6")), now(), 0.05, { duty: .25, vol: .7 }); },
+    // tiếng số chạy BIG/SMALL
+    roll(k) { tone(N(NOTE(["C#5","E5","A4","B6"][k % 4])), now(), 0.05, { duty: .5, vol: .7 }); },
+    // nhạc chờ khi bật máy (dựng từ cùng chất liệu ngũ cung)
+    attract() {
+      return duet(
+        [["C#6",1],["E6",1],["B6",1],["A5",1],["C#6",1],["E6",1],["A5",2],["F#6",1],["C#6",1],["E6",1],["A5",1],["G#7",2],["F#6",4]],
+        [["A3",4],["E4",4],["A3",4],["E4",4]], 0.12);
+    },
+  };
+
+  /* ---- âm thanh gốc do người chơi nạp: cắt từng đoạn theo mốc thời gian ---- */
+  let clipBuf = null, clipCfg = {}, clipOn = false, pending = null, clipGain = null, runSrc = null;
+  async function decodePending() {
+    if (!ctx || !pending) return;
+    const ab = pending; pending = null;
+    try { clipBuf = await ctx.decodeAudioData(ab.slice(0)); } catch (e) { clipBuf = null; api.onclipinfo?.("Không đọc được file âm thanh này."); return; }
+    api.onclipinfo?.(`Đã nạp: ${clipBuf.duration.toFixed(1)} giây`);
+  }
+  function clip(name, loop = false) {
+    if (!ctx || muted || !clipOn || !clipBuf) return null;
+    const r = clipCfg[name];
+    if (!r || !(r[1] > r[0]) || r[0] >= clipBuf.duration) return null;
+    if (!clipGain) {
+      clipGain = ctx.createGain(); clipGain.gain.value = api._vol || 3;
+      const comp = ctx.createDynamicsCompressor();
+      clipGain.connect(comp); comp.connect(ctx.destination);
+    }
+    const src = ctx.createBufferSource();
+    src.buffer = clipBuf; src.connect(clipGain);
+    if (loop) { src.loop = true; src.loopStart = r[0]; src.loopEnd = r[1]; src.start(0, r[0]); return src; }
+    src.start(0, r[0], r[1] - r[0]);
+    return (r[1] - r[0]) * 1000;
+  }
+  const api = Object.assign({}, synth);
+  for (const n of ["coin", "bet", "start", "tick", "stop", "win", "lose", "lucky", "eat", "count", "roll", "attract"]) {
+    api[n] = (...a) => { const c = clip(n); return c !== null ? c : synth[n].apply(api, a); };
+  }
+  api.bigWin = () => { const a = api.win(); setTimeout(() => api.win(), a); return a * 2; };
+  api.sweepOn = () => { if (runSrc) return; const s = clip("run", true); if (s) runSrc = s; else synth.sweepOn(); };
+  api.sweepOff = () => { if (runSrc) { try { runSrc.stop(); } catch (e) {} runSrc = null; } synth.sweepOff(); };
+  api.init = () => { init(); decodePending(); };
+  api.setClipAudio = ab => { pending = ab; clipBuf = null; decodePending(); };
+  api.setClipCfg = (cfg, on, vol) => { clipCfg = cfg; clipOn = on; if (clipGain) clipGain.gain.value = vol; api._vol = vol; };
+  api.preview = name => { init(); decodePending(); const was = clipOn; clipOn = true; if (clipGain) clipGain.gain.value = api._vol || 3; const c = clip(name); clipOn = was; return c; };
+  Object.defineProperty(api, "muted", { get: () => muted });
+  api.toggle = () => synth.toggle();
+  return api;
+})();
+
+/* =====================================================================
+   GIAO DIỆN
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const board = $("board"), cells = [];
+const LAMP_COLORS = ["#c62828", "#2e7d32", "#f9a825", "#1565c0", "#6a1b9a"];
+RING.forEach((c, i) => {
+  const [r, col] = gridPos(i);
+  const d = document.createElement("div");
+  d.className = "cell";
+  d.style.gridRow = r + 1; d.style.gridColumn = col + 1;
+  let art = c.f === "lucky" ? luckyArt(c.name, c.name === "機會" ? "?" : "!", c.name === "機會" ? "#e01b1b" : "#1aa33a")
+          : c.small ? smallArt(c.f) : ART[c.f];
+  d.innerHTML = icon(art);
+  // đèn nhỏ nằm ở mép trong của ô (giống bóng đèn màu trên máy)
+  const lamp = document.createElement("i"); lamp.className = "lamp";
+  lamp.style.setProperty("--lc", LAMP_COLORS[i % 5]);
+  if (r === 0) Object.assign(lamp.style, { bottom: "-14%", left: "38%" });
+  else if (r === 6) Object.assign(lamp.style, { top: "-14%", left: "38%" });
+  else if (col === 6) Object.assign(lamp.style, { left: "-14%", top: "38%" });
+  else Object.assign(lamp.style, { right: "-14%", top: "38%" });
+  d.appendChild(lamp);
+  board.appendChild(d); cells.push(d);
+});
+const center = document.createElement("div");
+center.id = "center";
+center.innerHTML = `
+<canvas id="fx" aria-hidden="true"></canvas>
+<svg id="logo" viewBox="0 0 100 100" aria-hidden="true">
+  <defs>
+    <linearGradient id="lgGold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffbe0"/><stop offset=".38" stop-color="#ffd84a"/><stop offset=".55" stop-color="#e09a00"/><stop offset="1" stop-color="#ffe680"/>
+    </linearGradient>
+    <linearGradient id="lgRib" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#ff4a3a"/><stop offset="1" stop-color="#a80d05"/></linearGradient>
+    <radialGradient id="lgGlow"><stop offset="0" stop-color="#fff6b0" stop-opacity=".9"/><stop offset=".5" stop-color="#ffb000" stop-opacity=".35"/><stop offset="1" stop-color="#ff8000" stop-opacity="0"/></radialGradient>
+  </defs>
+  <circle cx="50" cy="40" r="32" fill="url(#lgGlow)" class="glow"/>
+  <!-- ruy băng 三六豹 · 豹子 -->
+  <g transform="translate(0 6)">
+    <path d="M14 10 L22 8 L22 18 L14 20 L17 15Z" fill="#7a0703"/><path d="M86 10 L78 8 L78 18 L86 20 L83 15Z" fill="#7a0703"/>
+    <path d="M20 7 Q50 1 80 7 L80 17 Q50 11 20 17Z" fill="url(#lgRib)" stroke="#ffd84a" stroke-width=".8"/>
+    <text x="50" y="14.2" text-anchor="middle" font-size="6.4" font-weight="900" fill="#fff6c8" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" letter-spacing="1">三六豹 · 豹子</text>
+  </g>
+  <!-- chữ BAR kiểu logo game: bóng đổ, viền đỏ, mạ vàng -->
+  <g font-family="'Arial Black','Impact',sans-serif" font-weight="900" text-anchor="middle" font-size="27" letter-spacing="1">
+    <text x="51.4" y="51.4" fill="#2a0600">BAR</text>
+    <text x="50" y="50" fill="none" stroke="#b80c00" stroke-width="5" stroke-linejoin="round">BAR</text>
+    <text x="50" y="50" fill="url(#lgGold)" stroke="#fff3a0" stroke-width=".6">BAR</text>
+  </g>
+  <g transform="translate(50 59)">
+    <rect x="-24" y="-5" width="48" height="9" rx="4.5" fill="#0d2c66" stroke="#ffd84a" stroke-width=".8"/>
+    <text y="1.9" text-anchor="middle" font-size="5.6" font-weight="900" fill="#ffe680" font-family="'Arial Black',sans-serif" letter-spacing="1.2">★ FRUIT ★</text>
+  </g>
+</svg>
+<div class="orbit">
+  ${["seven","apple","bell","melon","star","orange"].map((k,i)=>`<i class="fl" style="--i:${i};--sx:${[-230,230,-235,235,-120,120][i]}%;--sy:${[-150,-150,30,30,105,105][i]}%">${icon(ART[k])}</i>`).join("")}
+</div>
+<div id="banner"></div>
+<div id="mid">--</div>`;
+board.appendChild(center);
+
+/* ---------- nền trung tâm: tia sáng xoay, viền bóng đèn chạy, lấp lánh ---------- */
+const FX = (() => {
+  const cv = $("fx"), g = cv.getContext("2d");
+  const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let W = 0, H = 0, rot = 0, chase = 0, last = 0, hot = false;
+  const stars = Array.from({ length: 26 }, () => ({ x: Math.random(), y: Math.random(), p: Math.random() * 6.28, s: .5 + Math.random() }));
+  function size() {
+    const r = cv.getBoundingClientRect(), d = Math.min(2, devicePixelRatio || 1);
+    W = cv.width = Math.max(1, Math.round(r.width * d)); H = cv.height = Math.max(1, Math.round(r.height * d));
+  }
+  function draw(t) {
+    const dt = Math.min(50, t - last); last = t;
+    rot += dt * (hot ? 0.0016 : 0.00025); chase += dt * (hot ? 0.03 : 0.008);
+    const cx = W / 2, cy = H * 0.42, R = Math.hypot(W, H);
+    // nền xanh sân khấu
+    const bg = g.createRadialGradient(cx, cy, 0, cx, cy, R * .6);
+    bg.addColorStop(0, hot ? "#5fb4ff" : "#3d8cf0"); bg.addColorStop(.55, "#1c56c4"); bg.addColorStop(1, "#0a2370");
+    g.fillStyle = bg; g.fillRect(0, 0, W, H);
+    // tia sáng xoay
+    const n = 16;
+    g.save(); g.translate(cx, cy); g.rotate(rot);
+    g.fillStyle = hot ? "rgba(255,236,140,.20)" : "rgba(255,255,255,.09)";
+    for (let k = 0; k < n; k++) {
+      g.beginPath(); g.moveTo(0, 0); g.arc(0, 0, R, (k / n) * 6.283, ((k + .5) / n) * 6.283); g.closePath(); g.fill();
+    }
+    g.restore();
+    // vầng sáng sau logo
+    const halo = g.createRadialGradient(cx, cy, 0, cx, cy, W * .42);
+    halo.addColorStop(0, "rgba(255,250,200,.55)"); halo.addColorStop(1, "rgba(255,250,200,0)");
+    g.fillStyle = halo; g.fillRect(0, 0, W, H);
+    // sàn sân khấu tối dần
+    const fl = g.createLinearGradient(0, H * .68, 0, H);
+    fl.addColorStop(0, "rgba(10,20,60,0)"); fl.addColorStop(1, "rgba(5,10,40,.75)");
+    g.fillStyle = fl; g.fillRect(0, H * .68, W, H * .32);
+    // lấp lánh 4 cánh
+    for (const s of stars) {
+      const a = .5 + .5 * Math.sin(s.p + t * .004 * s.s);
+      const x = s.x * W, y = s.y * H, r = (1.2 + 2.2 * a) * (W / 260);
+      g.fillStyle = `rgba(255,255,230,${a * .9})`;
+      g.beginPath(); g.moveTo(x, y - r * 2); g.lineTo(x + r * .45, y - r * .45); g.lineTo(x + r * 2, y); g.lineTo(x + r * .45, y + r * .45);
+      g.lineTo(x, y + r * 2); g.lineTo(x - r * .45, y + r * .45); g.lineTo(x - r * 2, y); g.lineTo(x - r * .45, y - r * .45); g.fill();
+    }
+    // viền bóng đèn chạy quanh khung
+    const m = W * .035, w = W - 2 * m, h = H - 2 * m, per = 2 * (w + h), count = Math.floor(per / (W / 13));
+    for (let i = 0; i < count; i++) {
+      let d = i * per / count, x, y;
+      if (d < w) { x = m + d; y = m; } else if ((d -= w) < h) { x = W - m; y = m + d; }
+      else if ((d -= h) < w) { x = W - m - d; y = H - m; } else { d -= w; x = m; y = H - m - d; }
+      const on = (i + Math.floor(chase)) % 3 === 0;
+      g.beginPath(); g.arc(x, y, W * (on ? .016 : .011), 0, 6.283);
+      g.fillStyle = on ? (hot ? "#fff27a" : "#ffe14a") : "#7a5a10";
+      if (on) { g.shadowColor = "#ffd400"; g.shadowBlur = W * .03; }
+      g.fill(); g.shadowBlur = 0;
+    }
+    if (!still) requestAnimationFrame(draw);
+  }
+  new ResizeObserver(() => { size(); if (still) draw(0); }).observe(cv);
+  size(); requestAnimationFrame(draw);
+  return { set hot(v) { hot = v; center.classList.toggle("hot", v); } };
+})();
+
+const betRow = $("betrow"), betVals = [];
+FRUITS.forEach(f => {
+  const b = document.createElement("div"); b.className = "bet";
+  b.innerHTML = `<div class="mul">${PAY[f]}</div><div class="mi">${icon(ART[f])}</div><div class="bv">0</div>`;
+  betRow.appendChild(b); betVals.push(b.querySelector(".bv"));
+});
+
+const FUNCS = [["PAY", "pay"], ["WIN", "win"], ["◄", "left"], ["►", "right"], ["SMALL", "small"], ["BIG", "big"], ["", ""], ["START", "start"]];
+const funcRow = $("funcRow");
+FUNCS.forEach(([t, k]) => {
+  const w = document.createElement("div");
+  if (!k) { funcRow.appendChild(w); return; }
+  w.innerHTML = `<span class="lbl">${t}</span><button class="btn" data-k="${k}"></button>`;
+  funcRow.appendChild(w);
+});
+const betBtnRow = $("betBtnRow");
+FRUITS.forEach((f, idx) => {
+  const w = document.createElement("div");
+  w.innerHTML = `<div class="ic">${icon(ART[f])}</div><button class="btn orange" data-bet="${idx}"></button>`;
+  betBtnRow.appendChild(w);
+});
+
+/* =====================================================================
+   TRẠNG THÁI GAME
+   ===================================================================== */
+const S = {
+  credit: 0, win: 0, bets: [0, 0, 0, 0, 0, 0, 0, 0], lastBets: null, rebet: false,
+  busy: false, pos: 0, lit: new Set(), mode: "idle", // idle | spinning | won | double
+};
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function setLed(el, v) { el.querySelector("span").textContent = v; }
+function render() {
+  setLed($("credLed"), S.credit);
+  setLed($("winLed"), S.win);
+  S.bets.forEach((b, i) => betVals[i].textContent = b);
+  cells.forEach((c, i) => c.classList.toggle("on", S.lit.has(i) || (S.mode === "spinning" && i === S.pos)));
+  document.querySelectorAll('[data-k="win"],[data-k="big"],[data-k="small"]').forEach(b => b.classList.toggle("lit", S.win > 0 && !S.busy));
+}
+function banner(t) { const b = $("banner"); b.textContent = t || ""; b.classList.toggle("show", !!t); }
+function mid(t) { $("mid").textContent = t; }
+
+/* ---------- nút ---------- */
+function bet(idx) {
+  if (S.busy) return;
+  if (S.win > 0) collectInstant();
+  if (S.rebet) { S.bets = [0, 0, 0, 0, 0, 0, 0, 0]; S.rebet = false; }
+  if (S.credit < 1 || S.bets[idx] >= 99) { Snd.deny(); return; }
+  S.credit--; S.bets[idx]++; S.lit.clear();
+  Snd.bet(idx); render();
+}
+function collectInstant() { S.credit += S.win; S.win = 0; banner(""); }
+async function collect() {
+  if (S.busy || S.win <= 0) return;
+  S.busy = true; banner("");
+  const step = Math.max(1, Math.ceil(S.win / 60));
+  while (S.win > 0) { const d = Math.min(step, S.win); S.win -= d; S.credit += d; Snd.count(); render(); await sleep(35); }
+  S.busy = false; S.mode = "idle"; render();
+}
+async function start() {
+  if (S.busy) return;
+  if (S.win > 0) await collect();
+  if (S.rebet) {
+    const need = S.bets.reduce((a, b) => a + b, 0);
+    if (need === 0 || S.credit < need) { Snd.deny(); return; }
+    S.credit -= need;
+  }
+  if (S.bets.every(b => b === 0)) { Snd.deny(); return; }
+  S.busy = true; S.rebet = true; S.lit.clear(); banner(""); mid("--");
+  const target = pickCell();
+  await runLight(target, true);
+  let total = 0;
+  if (RING[target].f === "lucky") total = await luckyEvent(target);
+  else { S.lit.add(target); total = payFor([target]); }
+  await finishRound(total);
+}
+function payFor(idxs) {
+  return idxs.reduce((sum, i) => {
+    const c = RING[i]; if (c.f === "lucky") return sum;
+    return sum + S.bets[FRUITS.indexOf(c.f)] * cellPay(c);
+  }, 0);
+}
+async function finishRound(total) {
+  S.mode = total > 0 ? "won" : "idle";
+  S.lit.forEach(i => cells[i].classList.add("hit"));
+  if (total > 0) {
+    const big = total >= 100;
+    // đếm điểm thưởng lên BONUS-WIN
+    const step = Math.max(1, Math.ceil(total / 40));
+    const tune = big ? Snd.bigWin() : Snd.win();
+    for (let w = 0; w < total;) { w = Math.min(total, w + step); S.win = w; render(); await sleep(20); }
+    await sleep(Math.max(0, tune - total / step * 20));
+  } else {
+    await sleep(500);
+  }
+  cells.forEach(c => c.classList.remove("hit"));
+  FX.hot = false;
+  S.busy = false; render();
+}
+
+/* ---------- đèn chạy ---------- */
+async function runLight(target, full) {
+  S.mode = "spinning"; FX.hot = true;
+  if (full) { Snd.start(); await sleep(450); }
+  const dist = (target - S.pos + 24) % 24;
+  const steps = full ? 24 * 3 + dist + (dist < 6 ? 24 : 0) : dist + 24;
+  for (let k = 1; k <= steps; k++) {
+    S.pos = (S.pos + 1) % 24;
+    const left = steps - k;
+    // tăng tốc → chạy nhanh → giảm tốc dần (giống mạch máy thật)
+    let d = k < 10 ? 140 - k * 11 : left < 14 ? 30 + (14 - left) ** 2 * 2.2 : 28;
+    // vệt đuôi khi chạy nhanh
+    cells.forEach(c => c.classList.remove("on"));
+    cells[S.pos].classList.add("on");
+    if (d < 45) { cells[(S.pos + 23) % 24].classList.add("on"); cells[(S.pos + 22) % 24].classList.add("on"); }
+    S.lit.forEach(i => cells[i].classList.add("on"));
+    // chạy nhanh: tiếng quét liên tục; tăng/giảm tốc: tick từng bước
+    if (d < 45) Snd.sweepOn(); else { Snd.sweepOff(); Snd.tick(k); }
+    await sleep(d);
+  }
+  Snd.sweepOff();
+  cells.forEach(c => c.classList.remove("on"));
+  S.mode = "stopped";
+  cells[S.pos].classList.add("on");
+  if (full) await sleep(Snd.stop());
+  else Snd.tick(0);
+}
+
+/* ---------- ô may mắn ---------- */
+function weighted(list) { let r = Math.random() * list.reduce((a, x) => a + x[1], 0); for (const x of list) { r -= x[1]; if (r <= 0) return x[0]; } return list[0][0]; }
+async function blinkLucky(at) {
+  const ms = Snd.lucky();
+  for (let k = 0; k < 8; k++) { cells[at].classList.toggle("on"); await sleep(ms / 8); }
+  cells[at].classList.add("on");
+}
+async function luckyEvent(at) {
+  await blinkLucky(at);
+  const ev = weighted(LUCKY_EVENTS);
+  banner(LUCKY_NAME[ev]);
+  const fruitCells = RING.filter(c => c.f !== "lucky").map(c => c.i);
+  let lit = [];
+  const light = async (i, sound = true) => { lit.push(i); S.lit.add(i); cells[i].classList.add("on"); if (sound) Snd.start(); await sleep(sound ? 420 : 200); };
+  switch (ev) {
+    case "eat": await sleep(Snd.eat()); banner(""); return 0;
+    case "send": {
+      const n = 1 + Math.floor(Math.random() * 3);
+      S.lit.add(at);
+      for (let k = 0; k < n; k++) { const t = pickCell([9, 21, ...lit]); await runLight(t, false); await light(t, false); }
+      S.lit.delete(at); break;
+    }
+    case "xiaosanyuan": for (const i of [Math.random() < .5 ? 0 : 12, Math.random() < .5 ? 6 : 18, Math.random() < .5 ? 1 : 13]) await light(i); break;
+    case "dasanyuan": for (const i of [7, 19, 15]) await light(i); break;
+    case "dasixi": for (const i of [4, 10, 16, 22]) await light(i); break;
+    case "sihai": for (const i of [0, 6, 12, 18]) await light(i); break;
+    case "sanhua": {
+      const n = 4 + Math.floor(Math.random() * 3);
+      while (lit.length < n) { const i = fruitCells[Math.floor(Math.random() * fruitCells.length)]; if (!lit.includes(i)) await light(i); }
+      break;
+    }
+    case "train": {
+      const len = 3 + Math.floor(Math.random() * 4);
+      const stopAt = fruitCells[Math.floor(Math.random() * fruitCells.length)];
+      const steps = 24 + (stopAt - at + 24) % 24;
+      let head = at;
+      for (let k = 0; k < steps; k++) {
+        head = (head + 1) % 24;
+        cells.forEach(c => c.classList.remove("on"));
+        for (let j = 0; j < len; j++) cells[(head - j + 24) % 24].classList.add("on");
+        const left = steps - k;
+        if (left >= 10) Snd.sweepOn(); else { Snd.sweepOff(); Snd.tick(k); }
+        await sleep(left < 10 ? 40 + (10 - left) ** 2 * 3 : 45);
+      }
+      Snd.sweepOff();
+      for (let j = 0; j < len; j++) { const i = (head - j + 24) % 24; if (RING[i].f !== "lucky") { lit.push(i); S.lit.add(i); } }
+      await sleep(Snd.stop());
+      break;
+    }
+  }
+  render();
+  return payFor(lit);
+}
+
+/* ---------- BIG / SMALL (gấp đôi) ---------- */
+async function double(choice) {
+  if (S.busy || S.win <= 0) return;
+  S.busy = true; S.mode = "double"; banner(choice === "big" ? "BIG ▲ 8–14" : "SMALL ▼ 1–6"); render();
+  for (let k = 0; k < 22; k++) { mid(String(1 + Math.floor(Math.random() * 14)).padStart(2, "0")); Snd.roll(k); await sleep(40 + k * 4); }
+  const n = 1 + Math.floor(Math.random() * 14);
+  mid(String(n).padStart(2, "0"));
+  const ok = (choice === "big" && n >= 8) || (choice === "small" && n <= 6);
+  if (ok) {
+    S.win *= 2; banner("THẮNG ×2 !"); render(); await sleep(Snd.win());
+  } else {
+    S.win = 0; banner(n === 7 ? "RA 7 — MẤT" : "THUA"); render(); await sleep(Snd.lose()); S.mode = "idle";
+  }
+  await sleep(300); banner("");
+  S.busy = false; render();
+}
+function move(dir) {
+  if (S.busy) return;
+  if (dir === "right" && S.win > 0) { S.win--; S.credit++; Snd.count(); }
+  else if (dir === "left" && S.credit > 0 && (S.win > 0 || S.mode === "won")) { S.credit--; S.win++; Snd.count(); }
+  else { Snd.deny(); return; }
+  render();
+}
+
+/* ---------- gán sự kiện ---------- */
+const ACTIONS = {
+  start, win: collect, big: () => double("big"), small: () => double("small"),
+  left: () => move("left"), right: () => move("right"),
+  pay: () => { if (S.busy) return; if (S.credit + S.win > 0) { S.credit = 0; S.win = 0; Snd.coin(); banner("ĐÃ TRẢ XU"); setTimeout(() => banner(""), 900); render(); } },
+};
+function bindHold(el, fn, repeat) {
+  let t1, t2;
+  const down = e => { e.preventDefault(); Snd.init(); el.classList.add("press"); Snd.btnSound(el.dataset.k || "bet" + el.dataset.bet); fn(); if (repeat) t1 = setTimeout(() => t2 = setInterval(fn, 90), 420); };
+  const up = () => { el.classList.remove("press"); clearTimeout(t1); clearInterval(t2); };
+  el.addEventListener("pointerdown", down);
+  ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, up));
+}
+document.querySelectorAll("[data-k]").forEach(b => bindHold(b, () => ACTIONS[b.dataset.k](), b.dataset.k === "left" || b.dataset.k === "right"));
+document.querySelectorAll("[data-bet]").forEach(b => bindHold(b, () => bet(+b.dataset.bet), true));
+/* ---------- TOP UP: 3 lượt, sau đó xem quảng cáo hoặc mua Pro ---------- */
+const Quota = (() => {
+  const KEY = "maybar-topup", FREE = 3;
+  let st = { used: 0, pro: false };
+  try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  return {
+    FREE,
+    get used() { return st.used; }, get pro() { return st.pro; },
+    left() { return st.pro ? Infinity : Math.max(0, FREE - st.used); },
+    canTopUp() { return st.pro || st.used < FREE; },
+    spend() { if (!st.pro) { st.used++; save(); } },
+    unlockByAd() { st.used = 0; save(); },
+    setPro(v) { st.pro = v; save(); }, // dùng khi đã nối cổng thanh toán
+  };
+})();
+function syncCoin() {
+  const left = Quota.left();
+  $("coin").textContent = Quota.pro ? "TOP UP (+100) · PRO" : `TOP UP (+100) · còn ${left}`;
+}
+function topUp() {
+  Snd.init();
+  if (S.credit > 99900) return;
+  Quota.spend(); S.credit += 100; Snd.coin(); render(); syncCoin();
+}
+function watchAd() {
+  return new Promise(res => {
+    const ad = $("ad"), cnt = $("adcount");
+    ad.classList.add("show");
+    let n = 5; cnt.textContent = n;
+    const t = setInterval(() => {
+      n--; cnt.textContent = n > 0 ? n : "✓";
+      if (n <= 0) { clearInterval(t); ad.classList.remove("show"); res(); }
+    }, 1000);
+  });
+}
+$("coin").addEventListener("click", () => {
+  Snd.init();
+  if (S.busy) return;
+  if (!Quota.canTopUp()) { $("gateMsg").textContent = ""; $("gate").classList.add("show"); return; }
+  topUp();
+});
+$("gateAd").addEventListener("click", async () => {
+  $("gate").classList.remove("show");
+  await watchAd();
+  Quota.unlockByAd(); syncCoin(); topUp();
+});
+/* Thanh toán Pro: Apple chỉ cho bán qua App Store (StoreKit) trong ứng dụng iOS, không làm được trên web.
+   Khi có vỏ ứng dụng iOS, cầu nối native gán Billing.native và trả về kết quả giao dịch đã xác minh. */
+const Billing = {
+  PRODUCT_ID: "maybar.pro.yearly",
+  PRICE_TEXT: "1,99 USD / năm",
+  native: null,
+  async buyPro() {
+    if (!this.native) return { ok: false, msg: "Mua Pro qua App Store chỉ dùng được trong ứng dụng iOS. Bản web này chưa mua được." };
+    const r = await this.native.purchase(this.PRODUCT_ID);
+    return r && r.verified ? { ok: true } : { ok: false, msg: "Giao dịch chưa hoàn tất." };
+  },
+};
+$("gatePro").textContent = `⭐ Pro · ${Billing.PRICE_TEXT}`;
+$("gatePro").addEventListener("click", async () => {
+  $("gateMsg").textContent = "Đang kiểm tra giao dịch…";
+  const r = await Billing.buyPro();
+  if (r.ok) { Quota.setPro(true); syncCoin(); $("gate").classList.remove("show"); }
+  else $("gateMsg").textContent = r.msg;
+});
+$("gateClose").addEventListener("click", () => $("gate").classList.remove("show"));
+syncCoin();
+$("mute").addEventListener("click", () => { $("mute").textContent = Snd.toggle() ? "🔇" : "🔊"; });
+$("help").addEventListener("click", () => $("rules").classList.add("show"));
+$("closeRules").addEventListener("click", () => $("rules").classList.remove("show"));
+
+/* =====================================================================
+   HÌNH & ÂM THANH GỐC (người chơi tự nạp, lưu IndexedDB trong máy)
+   ===================================================================== */
+// [sự kiện, nhãn, bắt đầu, kết thúc] — mốc (giây) đo được trong video máy BAR khi phân tích phổ
+const CLIP_EVENTS = [
+  ["coin", "Nạp điểm (chìa khóa)", 33.09, 33.25],
+  ["bet", "Bấm nút cược", 134.22, 134.55],
+  ["start", "Bấm START", 57.66, 58.55],
+  ["run", "Đèn chạy nhanh (lặp)", 160.04, 160.56],
+  ["tick", "Đèn chậm – mỗi bước", 164.34, 164.56],
+  ["stop", "Đèn dừng", 165.94, 170.95],
+  ["win", "Nhạc thắng", 171.0, 179.7],
+  ["count", "Đếm điểm – mỗi bíp", 187.1, 187.32],
+  ["lucky", "Ô 機會 / 運命", null, null],
+  ["eat", "Ăn đèn", null, null],
+  ["roll", "BIG/SMALL – số chạy", null, null],
+  ["lose", "BIG/SMALL – thua", null, null],
+  ["attract", "Nhạc bật máy", null, null],
+];
+const Store = (() => {
+  let dbp = null;
+  const db = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open("maybar", 1);
+    r.onupgradeneeded = () => r.result.createObjectStore("kv");
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  }));
+  const op = (mode, fn) => db().then(d => new Promise((res, rej) => {
+    const tx = d.transaction("kv", mode), q = fn(tx.objectStore("kv"));
+    tx.oncomplete = () => res(q.result); tx.onerror = () => rej(tx.error);
+  }));
+  return {
+    get: k => op("readonly", s => s.get(k)).catch(() => undefined),
+    set: (k, v) => op("readwrite", s => s.put(v, k)).catch(() => {}),
+  };
+})();
+const cfg = {
+  crop: { x: 0, y: 0, w: 100, h: 100 }, useSkin: false, useAudio: false, vol: 3,
+  clips: Object.fromEntries(CLIP_EVENTS.map(([k, , s, e]) => [k, [s, e]])),
+};
+const skinImg = document.createElement("img");
+skinImg.id = "skinImg"; skinImg.alt = ""; skinImg.hidden = true;
+board.prepend(skinImg);
+let skinUrl = null;
+
+function applySkin() {
+  const on = !!skinUrl && cfg.useSkin;
+  board.classList.toggle("skin", on);
+  skinImg.hidden = !on;
+  if (!on) return;
+  const { x, y, w, h } = cfg.crop;
+  Object.assign(skinImg.style, { width: 10000 / w + "%", height: 10000 / h + "%", left: -x / w * 100 + "%", top: -y / h * 100 + "%" });
+}
+function applyAudio() { Snd.setClipCfg(cfg.clips, cfg.useAudio, cfg.vol); }
+const saveCfg = () => Store.set("cfg", JSON.parse(JSON.stringify(cfg)));
+
+function buildSetup() {
+  for (const k of ["x", "y", "w", "h"]) {
+    const el = $("c" + k), out = $("c" + k + "o");
+    el.value = cfg.crop[k]; out.textContent = cfg.crop[k];
+    el.addEventListener("input", () => { cfg.crop[k] = +el.value; out.textContent = el.value; applySkin(); saveCfg(); });
+  }
+  $("vol").value = cfg.vol; $("volo").textContent = cfg.vol;
+  $("vol").addEventListener("input", () => { cfg.vol = +$("vol").value; $("volo").textContent = cfg.vol; applyAudio(); saveCfg(); });
+  $("useSkin").checked = cfg.useSkin;
+  $("useSkin").addEventListener("change", () => { cfg.useSkin = $("useSkin").checked; applySkin(); saveCfg(); });
+  $("useAudio").checked = cfg.useAudio;
+  $("useAudio").addEventListener("change", () => { cfg.useAudio = $("useAudio").checked; applyAudio(); saveCfg(); });
+  const tb = $("clipTable");
+  tb.innerHTML = "<tr><td><b>Sự kiện</b></td><td><b>Bắt đầu</b></td><td><b>Kết thúc</b></td><td></td></tr>";
+  for (const [k, label] of CLIP_EVENTS) {
+    const tr = document.createElement("tr");
+    const [s, e] = cfg.clips[k] || [null, null];
+    tr.innerHTML = `<td>${label}</td><td><input type="number" id="cs_${k}" step="0.01" min="0" value="${s ?? ""}"></td><td><input type="number" id="ce_${k}" step="0.01" min="0" value="${e ?? ""}"></td><td><button id="cp_${k}" aria-label="Nghe thử">▶</button></td>`;
+    tb.appendChild(tr);
+    const upd = () => {
+      const a = $("cs_" + k).value, b = $("ce_" + k).value;
+      cfg.clips[k] = [a === "" ? null : +a, b === "" ? null : +b];
+      applyAudio(); saveCfg();
+    };
+    tr.querySelectorAll("input").forEach(i => i.addEventListener("change", upd));
+    tr.querySelector("button").addEventListener("click", () => { if (Snd.preview(k) === null) $("audInfo").textContent = "Chưa có file hoặc mốc không hợp lệ."; });
+  }
+  $("imgFile").addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (skinUrl) URL.revokeObjectURL(skinUrl);
+    skinUrl = URL.createObjectURL(f); skinImg.src = skinUrl;
+    cfg.useSkin = true; $("useSkin").checked = true;
+    applySkin(); saveCfg(); Store.set("img", f);
+  });
+  $("audFile").addEventListener("change", async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $("audInfo").textContent = "Đang đọc file…";
+    const ab = await f.arrayBuffer();
+    Snd.setClipAudio(ab);
+    cfg.useAudio = true; $("useAudio").checked = true;
+    applyAudio(); saveCfg(); Store.set("aud", f);
+  });
+  Snd.onclipinfo = t => { $("audInfo").textContent = t; };
+}
+$("setupBtn").addEventListener("click", () => { Snd.init(); $("setup").classList.add("show"); });
+$("closeSetup").addEventListener("click", () => $("setup").classList.remove("show"));
+
+(async () => {
+  const saved = await Store.get("cfg");
+  if (saved) Object.assign(cfg, saved, { crop: { ...cfg.crop, ...saved.crop }, clips: { ...cfg.clips, ...saved.clips } });
+  buildSetup();
+  const img = await Store.get("img");
+  if (img) { skinUrl = URL.createObjectURL(img); skinImg.src = skinUrl; }
+  applySkin();
+  const aud = await Store.get("aud");
+  if (aud) { $("audInfo").textContent = "Đang đọc file đã lưu…"; Snd.setClipAudio(await aud.arrayBuffer()); }
+  applyAudio();
+})();
+$("go").addEventListener("click", async () => {
+  Snd.init(); $("start-overlay").remove();
+  // màn chào: đèn chạy vòng + nhạc
+  const ms = Snd.attract(); const t0 = performance.now(); let i = 0;
+  while (performance.now() - t0 < ms) { cells.forEach(c => c.classList.remove("on")); cells[i % 24].classList.add("on"); cells[(i + 12) % 24].classList.add("on"); i++; await sleep(60); }
+  cells.forEach(c => c.classList.remove("on"));
+});
+render();
+</script>
+</body>
+</html>
