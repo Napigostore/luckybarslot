@@ -222,6 +222,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
     <p>Xem một quảng cáo ngắn để mở thêm 3 lượt nạp (mỗi lượt +100), hoặc mua bản Pro để nạp không giới hạn.</p>
     <button id="gateAd">📺 Xem quảng cáo</button>
     <button id="gatePro" class="pro">⭐ Mua bản Pro</button>
+    <button id="gateRestore" class="ghost">Khôi phục mua hàng</button>
     <div id="gateMsg"></div>
     <button id="gateClose" class="ghost">Để sau</button>
   </div>
@@ -909,16 +910,40 @@ $("gateAd").addEventListener("click", async () => {
   await watchAd();
   Quota.unlockByAd(); syncCoin(); topUp();
 });
-/* Thanh toán Pro: Apple chỉ cho bán qua App Store (StoreKit) trong ứng dụng iOS, không làm được trên web.
-   Khi có vỏ ứng dụng iOS, cầu nối native gán Billing.native và trả về kết quả giao dịch đã xác minh. */
+/* Thanh toán Pro qua StoreKit (App Store). Trong ứng dụng iOS, plugin RevenueCat của Capacitor làm cầu nối StoreKit.
+   Trên web, nút báo chưa mua được. Thay REVENUECAT_APPLE_KEY bằng khóa công khai Apple của RevenueCat. */
 const Billing = {
   PRODUCT_ID: "maybar.pro.yearly",
+  ENTITLEMENT: "pro",
+  APPLE_KEY: "REVENUECAT_APPLE_KEY",
   PRICE_TEXT: "1,99 USD / năm",
-  native: null,
+  get P() { return window.Capacitor?.isNativePlatform?.() ? window.Capacitor.Plugins?.Purchases : null; },
+  async configure() {
+    if (this._ready || !this.P || this.APPLE_KEY === "REVENUECAT_APPLE_KEY") return;
+    await this.P.configure({ apiKey: this.APPLE_KEY });
+    this._ready = true;
+  },
+  async isPro() {
+    if (!this.P) return false;
+    await this.configure();
+    const { customerInfo } = await this.P.getCustomerInfo();
+    return !!customerInfo.entitlements.active[this.ENTITLEMENT];
+  },
   async buyPro() {
-    if (!this.native) return { ok: false, msg: "Mua Pro qua App Store chỉ dùng được trong ứng dụng iOS. Bản web này chưa mua được." };
-    const r = await this.native.purchase(this.PRODUCT_ID);
-    return r && r.verified ? { ok: true } : { ok: false, msg: "Giao dịch chưa hoàn tất." };
+    if (!this.P) return { ok: false, msg: "Mua Pro chỉ dùng được trong ứng dụng iOS trên App Store." };
+    if (this.APPLE_KEY === "REVENUECAT_APPLE_KEY") return { ok: false, msg: "Chưa cấu hình khóa thanh toán." };
+    await this.configure();
+    const { current } = await this.P.getOfferings().then(r => r.offerings);
+    const pkg = current?.availablePackages.find(p => p.product.identifier === this.PRODUCT_ID);
+    if (!pkg) return { ok: false, msg: "Chưa tải được gói Pro từ App Store." };
+    const { customerInfo } = await this.P.purchasePackage({ aPackage: pkg });
+    return customerInfo.entitlements.active[this.ENTITLEMENT] ? { ok: true } : { ok: false, msg: "Giao dịch chưa hoàn tất." };
+  },
+  async restore() {
+    if (!this.P) return { ok: false, msg: "Khôi phục chỉ dùng được trên App Store." };
+    await this.configure();
+    const { customerInfo } = await this.P.restorePurchases();
+    return customerInfo.entitlements.active[this.ENTITLEMENT] ? { ok: true } : { ok: false, msg: "Không tìm thấy gói Pro để khôi phục." };
   },
 };
 $("gatePro").textContent = `⭐ Pro · ${Billing.PRICE_TEXT}`;
@@ -928,6 +953,13 @@ $("gatePro").addEventListener("click", async () => {
   if (r.ok) { Quota.setPro(true); syncCoin(); $("gate").classList.remove("show"); }
   else $("gateMsg").textContent = r.msg;
 });
+$("gateRestore").addEventListener("click", async () => {
+  $("gateMsg").textContent = "Đang khôi phục…";
+  const r = await Billing.restore();
+  if (r.ok) { Quota.setPro(true); syncCoin(); $("gate").classList.remove("show"); }
+  else $("gateMsg").textContent = r.msg;
+});
+Billing.isPro().then(p => { if (p) { Quota.setPro(true); syncCoin(); } }).catch(() => {});
 $("gateClose").addEventListener("click", () => $("gate").classList.remove("show"));
 syncCoin();
 $("mute").addEventListener("click", () => { $("mute").textContent = Snd.toggle() ? "🔇" : "🔊"; });
