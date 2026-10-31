@@ -12,7 +12,7 @@ platform :ios do
     deliver(
       app_identifier: "com.luckybarslot",
       skip_binary_upload: true,
-      skip_screenshots: true,
+      skip_screenshots: false,
       force: true,
       submit_for_review: false,
       precheck_include_in_app_purchases: false
