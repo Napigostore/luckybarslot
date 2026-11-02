@@ -112,7 +112,7 @@ jobs:
           if-no-files-found: ignore
 
   listing:
-    if: ${{ inputs.listing }}
+    if: ${{ inputs.listing || contains(github.event.head_commit.message, '[listing]') }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
