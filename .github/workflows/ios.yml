@@ -137,6 +137,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Install the App Store Connect helpers
+        run: python3 -m pip install PyJWT cryptography
       - name: Submit the version for App Review
         env:
           ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
