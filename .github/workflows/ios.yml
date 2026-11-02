@@ -126,3 +126,22 @@ jobs:
           ISSUER: ${{ secrets.ASC_ISSUER_ID }}
           KEY_P8: ${{ secrets.ASC_KEY_P8 }}
         run: bundle exec fastlane listing
+
+  submit:
+    # Runs after the TestFlight job in the same run, or on its own when that build is already processed.
+    needs: testflight
+    if: ${{ always() && (inputs.submit || contains(github.event.head_commit.message, '[submit]')) && needs.testflight.result != 'failure' && needs.testflight.result != 'cancelled' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Submit the version for App Review
+        env:
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          ASC_KEY_P8: ${{ secrets.ASC_KEY_P8 }}
+        run: |
+          VERSION=$(grep -m1 "MARKETING_VERSION" ios/App/App.xcodeproj/project.pbxproj | sed 's/.*= *\(.*\);/\1/' | tr -d ' ')
+          python3 tools/asc_submit.py "$VERSION"
