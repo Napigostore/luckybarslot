@@ -56,6 +56,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 #center.hot .fl{animation-duration:2.4s}
 @media (prefers-reduced-motion:reduce){.fl,.fl svg,#logo .glow{animation:none}
   .fl{transform:translate(var(--sx),var(--sy)) scale(.85)}}
+#hiscore{position:absolute;left:0;right:0;top:4%;text-align:center;z-index:2;font-family:"Arial Black",Arial,sans-serif;font-size:clamp(11px,3.4vw,15px);color:#fff3a0;text-shadow:0 1px 0 #7a4a00,0 0 6px #000}
 #mid{position:absolute;left:50%;top:83%;transform:translate(-50%,-50%);z-index:2;background:#120201;border:2px solid #600;border-radius:3px;padding:0 4px;font-family:"Courier New",monospace;font-weight:900;font-size:clamp(22px,7vw,36px);color:var(--led);text-shadow:0 0 6px #ff3b1f;min-width:2.2em;text-align:center}
 #banner{position:absolute;left:0;right:0;top:6%;text-align:center;z-index:2;font-size:clamp(14px,4.4vw,22px);color:#fff;text-shadow:0 2px 0 #c00,0 0 8px #000;opacity:0;transition:opacity .2s}
 #banner.show{opacity:1;animation:pulse .4s ease-in-out infinite alternate}
@@ -67,7 +68,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 .bet .mul{font-size:10px;color:#ffe;background:#c2410c;width:100%;text-align:center;line-height:13px}
 .bet .mi{width:70%;aspect-ratio:1/1}
 .bet .mi svg{width:100%;height:100%}
-.bet .bv{font-family:"Courier New",monospace;font-weight:900;color:var(--led);text-shadow:0 0 5px #f30;font-size:clamp(14px,4.4vw,20px);line-height:1}
+.bet .bv{font-family:"Courier New",monospace;font-weight:900;color:var(--led);text-shadow:0 0 5px #f30;font-size:clamp(18px,5.6vw,26px);line-height:1}
 
 /* ---------- control panel ---------- */
 #panel{flex:1;min-height:0;background:linear-gradient(#ff8a00,#e23a00 50%,#b31206);border-radius:14px 14px 8px 8px;padding:8px 6px;box-shadow:inset 0 3px 0 #ffd37a,0 6px 18px #0008;display:flex;flex-direction:column;justify-content:space-around;gap:6px}
@@ -168,7 +169,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 </div></div>
 
 <div id="rules"><div class="box">
-  <h2>Luật chơi Máy BAR trái cây (小瑪莉)</h2>
+  <h2>Luật chơi Máy BAR trái cây</h2>
   <p><b>1. Nạp xu</b> – mỗi lần bấm NẠP XU được +10 điểm (CREDIT).</p>
   <p><b>2. Đặt cược</b> – bấm 8 nút cam phía dưới (BAR, 77, Sao, Dưa hấu, Chuông, Xoài, Cam, Táo). Mỗi lần bấm cược 1 điểm vào ô đó (tối đa 99/ô).</p>
   <p><b>3. START</b> – đèn chạy quanh 24 ô rồi dừng. Đèn dừng ở trái cây nào bạn có cược thì thắng = <i>cược × tỉ lệ</i>. Ô "nhỏ" (3 hình nhỏ trong khối) trả ×3 (BAR nhỏ trả ×50).</p>
@@ -178,15 +179,15 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
     <tr><td>Dưa hấu</td><td>×20</td></tr><tr><td>Chuông</td><td>×20</td></tr>
     <tr><td>Xoài</td><td>×15</td></tr><tr><td>Cam</td><td>×10</td></tr><tr><td>Táo</td><td>×5</td></tr>
   </table>
-  <p><b>4. Ô may mắn 機會 / 運命</b> – đèn dừng ở đây sẽ ra một trong các kết quả: <br>
+  <p><b>4. Ô may mắn CHANCE / FATE</b> – đèn dừng ở đây sẽ ra một trong các kết quả: <br>
   • <b>Ăn đèn</b> (không trúng gì)<br>
-  • <b>Tặng đèn</b> (送燈): chạy thêm 1–3 đèn, mỗi đèn đều được trả thưởng<br>
-  • <b>Tiểu Tam Nguyên</b> (小三元): Cam + Xoài + Chuông lớn<br>
-  • <b>Đại Tam Nguyên</b> (大三元): Dưa hấu + Sao + 77 lớn<br>
-  • <b>Đại Tứ Hỷ</b> (大四喜): cả 4 quả Táo lớn<br>
-  • <b>Tung Hoành Tứ Hải</b> (縱橫四海): 4 ô góc<br>
-  • <b>Chạy tàu</b> (開火車): một đoàn 3–6 đèn liền nhau<br>
-  • <b>Thiên Nữ Tán Hoa</b> (天女散花): 4–6 đèn ngẫu nhiên</p>
+  • <b>Tặng đèn</b>: chạy thêm 1–3 đèn, mỗi đèn đều được trả thưởng<br>
+  • <b>Tiểu Tam Nguyên</b>: Cam + Xoài + Chuông lớn<br>
+  • <b>Đại Tam Nguyên</b>: Dưa hấu + Sao + 77 lớn<br>
+  • <b>Đại Tứ Hỷ</b>: cả 4 quả Táo lớn<br>
+  • <b>Tung Hoành Tứ Hải</b>: 4 ô góc<br>
+  • <b>Chạy tàu</b>: một đoàn 3–6 đèn liền nhau<br>
+  • <b>Thiên Nữ Tán Hoa</b>: 4–6 đèn ngẫu nhiên</p>
   <p><b>5. Thắng điểm</b> nằm ở BONUS-WIN. Bấm <b>WIN</b> để lấy về CREDIT, hoặc chơi <b>BIG / SMALL</b> gấp đôi: số giữa màn hình chạy 1–14; 1–6 là SMALL, 8–14 là BIG, ra 7 thì mất. Đoán đúng ×2. Nút <b>◄ ►</b> chuyển từng điểm giữa WIN và CREDIT để chơi gấp đôi một phần.</p>
   <p><b>6.</b> Sau mỗi ván, mức cược được giữ – chỉ cần bấm START để cược lại y như cũ. <b>PAY</b> = trả xu (đưa CREDIT về 0).</p>
   <p style="font-size:12px;color:#666">Trò chơi giải trí, điểm không có giá trị quy đổi.</p>
@@ -213,7 +214,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 <div id="gate">
   <div class="gbox">
     <h2>Gói Pro</h2>
-    <p>Bản miễn phí cho 3 lượt TOP UP (mỗi lượt +100). Gói Pro nạp không giới hạn, tự gia hạn hằng năm qua App Store. Bạn có thể khôi phục gói đã mua trên thiết bị khác.</p>
+    <p>Miễn phí: 3 lượt TOP UP (+100) mỗi ngày. Gói Pro nạp không giới hạn, tự gia hạn hằng năm qua App Store. Bạn có thể khôi phục gói đã mua trên thiết bị khác.</p>
     <button id="gatePro" class="pro">⭐ Mua gói Pro</button>
     <button id="gateRestore" class="ghost">Khôi phục mua hàng</button>
     <div id="gateMsg"></div>
@@ -292,9 +293,8 @@ const cube = (x, y, s, art) => `
     <svg x="${s*0.08}" y="${s*0.33}" width="${s*0.84}" height="${s*0.84}" viewBox="0 0 100 100">${art}</svg>
   </g>`;
 const smallArt = k => cube(30, 2, 36, ART[k]) + cube(6, 48, 36, ART[k]) + cube(52, 48, 36, ART[k]);
-const luckyArt = (kanji, mark, col) => `
-  <text x="30" y="44" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" font-weight="900" font-size="30" text-anchor="middle" fill="#222">${kanji[0]}</text>
-  <text x="30" y="82" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" font-weight="900" font-size="30" text-anchor="middle" fill="#222">${kanji[1]}</text>
+const luckyArt = (label, mark, col) => `
+  <text x="30" y="50" font-family="Arial Black,Arial" font-weight="900" font-size="${label.length>6?13:17}" text-anchor="middle" fill="#222">${label}</text>
   <text x="72" y="80" font-family="Arial Black" font-weight="900" font-size="70" text-anchor="middle" fill="${col}" stroke="#111" stroke-width="2.5">${mark}</text>`;
 
 // unique gradient ids per instance (SVG ids are global in the document)
@@ -316,9 +316,9 @@ const VN = { bar: "BAR", seven: "77", star: "Sao", melon: "Dưa hấu", bell: "C
 // 24 ô theo chiều kim đồng hồ, bắt đầu từ góc trên-trái (đúng bố cục máy trong video)
 const RING = [
   ["orange"], ["bell"], ["bar", 1], ["bar"], ["apple"], ["apple", 1], ["mango"],      // hàng trên
-  ["melon"], ["melon", 1], ["lucky", "機會"], ["apple"], ["orange", 1],                // cột phải
+  ["melon"], ["melon", 1], ["lucky", "CHANCE"], ["apple"], ["orange", 1],                // cột phải
   ["orange"], ["bell"], ["seven", 1], ["seven"], ["apple"], ["mango", 1], ["mango"],  // hàng dưới (phải→trái)
-  ["star"], ["star", 1], ["lucky", "運命"], ["apple"], ["bell", 1],                    // cột trái (dưới→trên)
+  ["star"], ["star", 1], ["lucky", "FATE"], ["apple"], ["bell", 1],                    // cột trái (dưới→trên)
 ].map(([f, x], i) => ({ i, f, small: x === 1, name: typeof x === "string" ? x : null }));
 
 const gridPos = i => i <= 6 ? [0, i] : i <= 11 ? [i - 6, 6] : i <= 18 ? [6, 18 - i] : [24 - i, 0];
@@ -340,8 +340,8 @@ const LUCKY_EVENTS = [
   ["eat", 34], ["send", 28], ["xiaosanyuan", 8], ["dasanyuan", 5], ["dasixi", 5], ["sihai", 4], ["train", 10], ["sanhua", 6],
 ];
 const LUCKY_NAME = {
-  eat: "ĂN ĐÈN", send: "送燈 TẶNG ĐÈN", xiaosanyuan: "小三元 TIỂU TAM NGUYÊN", dasanyuan: "大三元 ĐẠI TAM NGUYÊN",
-  dasixi: "大四喜 ĐẠI TỨ HỶ", sihai: "縱橫四海 TỨ HẢI", train: "開火車 CHẠY TÀU", sanhua: "天女散花 TÁN HOA",
+  eat: "ĂN ĐÈN", send: "TẶNG ĐÈN", xiaosanyuan: "SMALL TRIPLE", dasanyuan: "BIG TRIPLE",
+  dasixi: "BIG FOUR", sihai: "FOUR CORNERS", train: "FIRE TRAIN", sanhua: "FLOWER SHOWER",
 };
 
 /* =====================================================================
@@ -525,7 +525,7 @@ RING.forEach((c, i) => {
   const d = document.createElement("div");
   d.className = "cell";
   d.style.gridRow = r + 1; d.style.gridColumn = col + 1;
-  let art = c.f === "lucky" ? luckyArt(c.name, c.name === "機會" ? "?" : "!", c.name === "機會" ? "#e01b1b" : "#1aa33a")
+  let art = c.f === "lucky" ? luckyArt(c.name, c.name === "CHANCE" ? "?" : "!", c.name === "CHANCE" ? "#e01b1b" : "#1aa33a")
           : c.small ? smallArt(c.f) : ART[c.f];
   d.innerHTML = icon(art);
   // đèn nhỏ nằm ở mép trong của ô (giống bóng đèn màu trên máy)
@@ -551,11 +551,11 @@ center.innerHTML = `
     <radialGradient id="lgGlow"><stop offset="0" stop-color="#fff6b0" stop-opacity=".9"/><stop offset=".5" stop-color="#ffb000" stop-opacity=".35"/><stop offset="1" stop-color="#ff8000" stop-opacity="0"/></radialGradient>
   </defs>
   <circle cx="50" cy="40" r="32" fill="url(#lgGlow)" class="glow"/>
-  <!-- ruy băng 三六豹 · 豹子 -->
+  <!-- ruy băng -->
   <g transform="translate(0 6)">
     <path d="M14 10 L22 8 L22 18 L14 20 L17 15Z" fill="#7a0703"/><path d="M86 10 L78 8 L78 18 L86 20 L83 15Z" fill="#7a0703"/>
     <path d="M20 7 Q50 1 80 7 L80 17 Q50 11 20 17Z" fill="url(#lgRib)" stroke="#ffd84a" stroke-width=".8"/>
-    <text x="50" y="14.2" text-anchor="middle" font-size="6.4" font-weight="900" fill="#fff6c8" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" letter-spacing="1">三六豹 · 豹子</text>
+    <text x="50" y="14.2" text-anchor="middle" font-size="6.4" font-weight="900" fill="#fff6c8" font-family="'Microsoft JhengHei','PingFang TC','Noto Sans TC',serif" letter-spacing="1">LUCKY BAR</text>
   </g>
   <!-- chữ BAR kiểu logo game: bóng đổ, viền đỏ, mạ vàng -->
   <g font-family="'Arial Black','Impact',sans-serif" font-weight="900" text-anchor="middle" font-size="27" letter-spacing="1">
@@ -571,6 +571,7 @@ center.innerHTML = `
 <div class="orbit">
   ${["seven","apple","bell","melon","star","orange"].map((k,i)=>`<i class="fl" style="--i:${i};--sx:${[-230,230,-235,235,-120,120][i]}%;--sy:${[-150,-150,30,30,105,105][i]}%">${icon(ART[k])}</i>`).join("")}
 </div>
+<div id="hiscore">TOP SCORE 0</div>
 <div id="banner"></div>
 <div id="mid">--</div>`;
 board.appendChild(center);
@@ -661,6 +662,8 @@ FRUITS.forEach((f, idx) => {
 /* =====================================================================
    TRẠNG THÁI GAME
    ===================================================================== */
+let best = 0;
+try { best = +(localStorage.getItem("maybar-best") || 0) || 0; } catch (e) {}
 const S = {
   credit: 0, win: 0, bets: [0, 0, 0, 0, 0, 0, 0, 0], lastBets: null, rebet: false,
   busy: false, pos: 0, lit: new Set(), mode: "idle", // idle | spinning | won | double
@@ -668,6 +671,8 @@ const S = {
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 function setLed(el, v) { el.querySelector("span").textContent = v; }
 function render() {
+  if (S.credit > best) { best = S.credit; try { localStorage.setItem("maybar-best", String(best)); } catch (e) {} }
+  $("hiscore").textContent = `TOP SCORE ${best}`;
   setLed($("credLed"), S.credit);
   setLed($("winLed"), S.win);
   S.bets.forEach((b, i) => betVals[i].textContent = b);
@@ -859,21 +864,24 @@ document.querySelectorAll("[data-bet]").forEach(b => bindHold(b, () => bet(+b.da
 /* ---------- TOP UP: 3 lượt, sau đó xem quảng cáo hoặc mua Pro ---------- */
 const Quota = (() => {
   const KEY = "maybar-topup", FREE = 3;
-  let st = { used: 0, pro: false };
+  const today = () => new Date().toDateString();
+  let st = { day: today(), used: 0, pro: false };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
+  if (st.day !== today()) { st.day = today(); st.used = 0; }
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} };
+  const refresh = () => { if (st.day !== today()) { st.day = today(); st.used = 0; save(); } };
   return {
     FREE,
-    get used() { return st.used; }, get pro() { return st.pro; },
-    left() { return st.pro ? Infinity : Math.max(0, FREE - st.used); },
-    canTopUp() { return st.pro || st.used < FREE; },
-    spend() { if (!st.pro) { st.used++; save(); } },
+    get used() { refresh(); return st.used; }, get pro() { return st.pro; },
+    left() { refresh(); return st.pro ? Infinity : Math.max(0, FREE - st.used); },
+    canTopUp() { refresh(); return st.pro || st.used < FREE; },
+    spend() { refresh(); if (!st.pro) { st.used++; save(); } },
     setPro(v) { st.pro = v; save(); }, // dùng khi đã nối cổng thanh toán
   };
 })();
 function syncCoin() {
   const left = Quota.left();
-  $("coin").textContent = Quota.pro ? "TOP UP (+100) · PRO" : `TOP UP (+100) · còn ${left}`;
+  $("coin").textContent = Quota.pro ? "TOP UP (+100) · PRO" : `TOP UP (+100) · còn ${left} hôm nay`;
 }
 function topUp() {
   Snd.init();
@@ -949,7 +957,7 @@ const CLIP_EVENTS = [
   ["stop", "Đèn dừng", 165.94, 170.95],
   ["win", "Nhạc thắng", 171.0, 179.7],
   ["count", "Đếm điểm – mỗi bíp", 187.1, 187.32],
-  ["lucky", "Ô 機會 / 運命", null, null],
+  ["lucky", "Ô CHANCE / FATE", null, null],
   ["eat", "Ăn đèn", null, null],
   ["roll", "BIG/SMALL – số chạy", null, null],
   ["lose", "BIG/SMALL – thua", null, null],
