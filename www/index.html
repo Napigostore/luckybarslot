@@ -159,6 +159,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
     <div class="row r1" id="betBtnRow"></div>
     <div id="coinbar">
       <button id="help">?</button>
+      <button id="proBtn">⭐ PRO</button>
       <button id="coin">TOP UP (+100)</button>
       <button id="setupBtn" aria-label="Hình và âm thanh gốc">🎛</button>
       <button id="mute">🔊</button>
@@ -209,19 +210,11 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
   <table id="clipTable"></table>
   <button id="closeSetup">XONG</button>
 </div>
-<div id="ad">
-  <div class="adbox">
-    <div class="adtag">QUẢNG CÁO</div>
-    <div class="adcard"><b>Quảng cáo mẫu</b><span>Thay bằng quảng cáo thật khi nối với SDK quảng cáo</span></div>
-    <div class="adnum">Nhận lượt nạp sau <span id="adcount">5</span> giây</div>
-  </div>
-</div>
 <div id="gate">
   <div class="gbox">
-    <h2>Hết 3 lượt TOP UP</h2>
-    <p>Xem một quảng cáo ngắn để mở thêm 3 lượt nạp (mỗi lượt +100), hoặc mua bản Pro để nạp không giới hạn.</p>
-    <button id="gateAd">📺 Xem quảng cáo</button>
-    <button id="gatePro" class="pro">⭐ Mua bản Pro</button>
+    <h2>Gói Pro</h2>
+    <p>Bản miễn phí cho 3 lượt TOP UP (mỗi lượt +100). Gói Pro nạp không giới hạn, tự gia hạn hằng năm qua App Store. Bạn có thể khôi phục gói đã mua trên thiết bị khác.</p>
+    <button id="gatePro" class="pro">⭐ Mua gói Pro</button>
     <button id="gateRestore" class="ghost">Khôi phục mua hàng</button>
     <div id="gateMsg"></div>
     <button id="gateClose" class="ghost">Để sau</button>
@@ -875,7 +868,6 @@ const Quota = (() => {
     left() { return st.pro ? Infinity : Math.max(0, FREE - st.used); },
     canTopUp() { return st.pro || st.used < FREE; },
     spend() { if (!st.pro) { st.used++; save(); } },
-    unlockByAd() { st.used = 0; save(); },
     setPro(v) { st.pro = v; save(); }, // dùng khi đã nối cổng thanh toán
   };
 })();
@@ -888,28 +880,13 @@ function topUp() {
   if (S.credit > 99900) return;
   Quota.spend(); S.credit += 100; Snd.coin(); render(); syncCoin();
 }
-function watchAd() {
-  return new Promise(res => {
-    const ad = $("ad"), cnt = $("adcount");
-    ad.classList.add("show");
-    let n = 5; cnt.textContent = n;
-    const t = setInterval(() => {
-      n--; cnt.textContent = n > 0 ? n : "✓";
-      if (n <= 0) { clearInterval(t); ad.classList.remove("show"); res(); }
-    }, 1000);
-  });
-}
 $("coin").addEventListener("click", () => {
   Snd.init();
   if (S.busy) return;
   if (!Quota.canTopUp()) { $("gateMsg").textContent = ""; $("gate").classList.add("show"); return; }
   topUp();
 });
-$("gateAd").addEventListener("click", async () => {
-  $("gate").classList.remove("show");
-  await watchAd();
-  Quota.unlockByAd(); syncCoin(); topUp();
-});
+$("proBtn").addEventListener("click", () => { Snd.init(); $("gateMsg").textContent = ""; $("gate").classList.add("show"); });
 /* Thanh toán Pro trực tiếp qua StoreKit (plugin @capgo/native-purchases), không cần dịch vụ trung gian.
    Trên web, nút báo chưa mua được. */
 const Billing = {
