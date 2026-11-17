@@ -98,6 +98,9 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 #coin:active{transform:translateY(3px);box-shadow:0 1px 0 #555}
 #mute{border:none;border-radius:8px;padding:10px 12px;background:#222;color:#fff;font-size:14px}
 #help{border:none;border-radius:8px;padding:10px 12px;background:#1d2a8a;color:#fff;font-size:14px;font-weight:900}
+#prorow{display:flex;justify-content:center;margin-bottom:6px}
+#proBtn{border:none;border-radius:8px;padding:12px 16px;width:100%;background:linear-gradient(#ffe36b,#ffb000);color:#5a1a00;font-weight:900;font-size:16px;white-space:nowrap;box-shadow:0 4px 0 #8a4b00}
+#proBtn:active{transform:translateY(3px);box-shadow:0 1px 0 #8a4b00}
 #rules{position:fixed;inset:0;background:#000c;display:none;z-index:50;padding:16px;overflow:auto}
 #rules.show{display:block}
 #rules .box{max-width:520px;margin:0 auto;background:#fff8e6;color:#222;border-radius:12px;padding:14px 16px;font-family:Arial,sans-serif;font-size:14px;line-height:1.45}
@@ -158,10 +161,10 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
   <div id="panel">
     <div class="row r1" id="funcRow"></div>
     <div class="row r1" id="betBtnRow"></div>
+    <div id="prorow"><button id="proBtn">⭐ GO PRO</button></div>
     <div id="coinbar">
       <button id="help">?</button>
-      <button id="proBtn">⭐ PRO</button>
-      <button id="coin">TOP UP (+100)</button>
+      <button id="coin">TOP UP (+50)</button>
       <button id="setupBtn" aria-label="Hình và âm thanh gốc">🎛</button>
       <button id="mute">🔊</button>
     </div>
@@ -214,7 +217,7 @@ html,body{margin:0;height:100%;background:#2a0400;color:#fff;font-family:"Arial 
 <div id="gate">
   <div class="gbox">
     <h2>Gói Pro</h2>
-    <p>Miễn phí: 3 lượt TOP UP (+100) mỗi ngày. Gói Pro nạp không giới hạn, tự gia hạn hằng năm qua App Store. Bạn có thể khôi phục gói đã mua trên thiết bị khác.</p>
+    <p>Miễn phí: 2 lượt TOP UP (+50) mỗi ngày. Gói Pro nạp không giới hạn, tự gia hạn hằng năm qua App Store. Bạn có thể khôi phục gói đã mua trên thiết bị khác.</p>
     <button id="gatePro" class="pro">⭐ Mua gói Pro</button>
     <button id="gateRestore" class="ghost">Khôi phục mua hàng</button>
     <div id="gateMsg"></div>
@@ -863,7 +866,7 @@ document.querySelectorAll("[data-k]").forEach(b => bindHold(b, () => ACTIONS[b.d
 document.querySelectorAll("[data-bet]").forEach(b => bindHold(b, () => bet(+b.dataset.bet), true));
 /* ---------- TOP UP: 3 lượt, sau đó xem quảng cáo hoặc mua Pro ---------- */
 const Quota = (() => {
-  const KEY = "maybar-topup", FREE = 3;
+  const KEY = "maybar-topup", FREE = 2;
   const today = () => new Date().toDateString();
   let st = { day: today(), used: 0, pro: false };
   try { Object.assign(st, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
@@ -881,12 +884,12 @@ const Quota = (() => {
 })();
 function syncCoin() {
   const left = Quota.left();
-  $("coin").textContent = Quota.pro ? "TOP UP (+100) · PRO" : `TOP UP (+100) · còn ${left} hôm nay`;
+  $("coin").textContent = Quota.pro ? "TOP UP (+50) · PRO" : `TOP UP (+50) · còn ${left} hôm nay`;
 }
 function topUp() {
   Snd.init();
   if (S.credit > 99900) return;
-  Quota.spend(); S.credit += 100; Snd.coin(); render(); syncCoin();
+  Quota.spend(); S.credit += 50; Snd.coin(); render(); syncCoin();
 }
 $("coin").addEventListener("click", () => {
   Snd.init();
